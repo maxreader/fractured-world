@@ -1,0 +1,11 @@
+{
+    "name": "fractured-world",
+    "version": "0.18.0",
+    "title": "Fractured World",
+    "author": "Maxreader",
+    "contact": "",
+    "homepage": "",
+    "factorio_version": "0.18",
+    "dependencies": ["base >= 0.17", "? angelsrefining","? angelsinfiniteores"],
+    "description": "Creates a new map preset that generates a world with only lab tiles"
+}
