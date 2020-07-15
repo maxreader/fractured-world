@@ -1,0 +1,24 @@
+{
+    "Lua.diagnostics.globals": [
+        "make_rotated_animation_variations_from_sheet",
+        "data",
+        "util",
+        "settings",
+        "rendering",
+        "surface",
+        "entity",
+        "global",
+        "script",
+        "defines",
+        "game",
+        "commands",
+        "circuit_connector_definitions",
+        "mods",
+        "log"
+    ],
+    "todo-tree.regex.regex": "((\\/\\/|#|<!--|;|\\/\\*|--|--!|--\\?|--\\*|^)\\s*($TAGS)|^\\s*- \\[ \\])",
+    "vscode-lua-format.configPath": ".vscode/style.txt",
+    "factorio.portal.username": "travis.aelvoet@gmail.com",
+    "factorio.portal.password": "Enderdragon1!",
+    "factorio.package.onExplorer": true
+}

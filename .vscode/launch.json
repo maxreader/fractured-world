@@ -28,14 +28,6 @@
             "factorioPath": "C:/Program Files/Factorio/bin/x64/factorio.exe",
             "factorioArgs": ["--load-game", "AB Testing"],
             "hookData": false
-        },
-        {
-            "type": "factoriomod",
-            "request": "launch",
-            "name": "Map Preview",
-            "factorioPath": "C:/Program Files/Factorio/bin/x64/factorio.exe",
-            "factorioArgs": ["--preset","Fractured","--generate-map-preview","C:/Users/travi/OneDrive/Pictures/something.png","--map-preview-size","2048"],
-            "hookData": false
         }
     ]
 }
