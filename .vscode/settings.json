@@ -16,7 +16,6 @@
         "mods",
         "log"
     ],
-    "todo-tree.regex.regex": "((\\/\\/|#|<!--|;|\\/\\*|--|--!|--\\?|--\\*|^)\\s*($TAGS)|^\\s*- \\[ \\])",
     "vscode-lua-format.configPath": ".vscode/style.txt",
     "factorio.portal.username": "travis.aelvoet@gmail.com",
     "factorio.portal.password": "Enderdragon1!",
