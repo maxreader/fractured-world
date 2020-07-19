@@ -1,6 +1,5 @@
 local mgp = data.raw["map-gen-presets"].default
-mgp["fractured-preset"] = {
-    name = "fractured-world-default",
+mgp["fractured-world-default"] = {
     order = "h",
     basic_settings = {
         property_expression_names = {
@@ -12,8 +11,7 @@ mgp["fractured-preset"] = {
         cliff_settings = {richness = 0}
     }
 }
-mgp["circles"] = {
-    name = "fractured-world-circles",
+mgp["fractured-world-circles"] = {
     order = "i",
     basic_settings = {
         property_expression_names = {
@@ -26,8 +24,7 @@ mgp["circles"] = {
     }
 }
 
-mgp["squares"] = {
-    name = "fractured-world-squares",
+mgp["fractured-world-squares"] = {
     order = "j",
     basic_settings = {
         property_expression_names = {
@@ -40,8 +37,7 @@ mgp["squares"] = {
     }
 }
 
-mgp["diamonds"] = {
-    name = "fractured-world-diamonds",
+mgp["fractured-world-diamonds"] = {
     order = "j",
     basic_settings = {
         property_expression_names = {
@@ -54,8 +50,7 @@ mgp["diamonds"] = {
     }
 }
 
-mgp["spiral"] = {
-    name = "fractured-world-spiral",
+mgp["fractured-world-spiral"] = {
     order = "k",
     basic_settings = {
         property_expression_names = {
@@ -68,7 +63,18 @@ mgp["spiral"] = {
     }
 }
 
--- mgp["waves"] = {}
+mgp["fractured-world-waves"] = {
+    order = "l",
+    basic_settings = {
+        property_expression_names = {
+            elevation = "waves",
+            moisture = "voronoi-value-squares",
+            temperature = "new-temperature",
+            aux = "new-aux"
+        },
+        cliff_settings = {richness = 0}
+    }
+}
 
 --[[mgp["hilbert"] = {
     name = "hilbert",

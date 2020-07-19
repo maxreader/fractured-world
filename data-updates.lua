@@ -94,7 +94,32 @@ local function get_richness(ore)
                    landDensity + addRich) * postMult, minimumRichness)
 end
 
+local ore_property_expressions = {}
 for ore, _ in pairs(currentResourceData) do
-    resources[ore].autoplace.probability_expression = get_probability(ore)
-    resources[ore].autoplace.richness_expression = get_richness(ore)
+    local probName = "fractured-world-" .. ore .. "-probability"
+    local richName = "fractured-world-" .. ore .. "-richness"
+    data:extend{
+        {
+            type = "noise-expression",
+            name = probName,
+            expression = get_probability(ore)
+        }, {
+            type = "noise-expression",
+            name = richName,
+            expression = get_richness(ore)
+        }
+    }
+    ore_property_expressions["entity:" .. ore .. ":probability"] = probName
+    ore_property_expressions["entity:" .. ore .. ":richness"] = richName
+    --[[resources[ore].autoplace.probability_expression = get_probability(ore)
+    resources[ore].autoplace.richness_expression = get_richness(ore)]]
 end
+
+for name, preset in pairs(data.raw["map-gen-presets"].default) do
+    if string.match(name, "fractured%-world") then
+        for k, v in pairs(ore_property_expressions) do
+            preset.basic_settings.property_expression_names[k] = v
+        end
+    end
+end
+

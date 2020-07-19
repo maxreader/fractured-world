@@ -15,8 +15,8 @@ local size = defaultSize / noise.var("segmentation_multiplier")
 local small_noise_factor = noise.get_control_setting("island-randomness").size_multiplier
 
 local function waves(x, y)
-    x = modulo(x, 4) * rof + modulo(y, 4) * (1 - rof)
-    y = modulo(y, 4) * rof + modulo(x, 4) * (1 - rof)
+    x = modulo(x, 4) * (1 - rof) + modulo(y, 4) * rof
+    y = modulo(y, 4) * (1 - rof) + modulo(x, 4) * rof
     return noise.clamp(greaterThan(y, 0) - modulo(x, 2) * (1 - equalTo(y, x)), 0, 1)
 end
 

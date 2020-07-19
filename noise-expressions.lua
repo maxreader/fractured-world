@@ -5,6 +5,7 @@ local get_closest_point = fnp.get_closest_point
 local get_closest_point_and_value = fnp.get_closest_point_and_value
 local get_closest_two_points = fnp.get_closest_two_points
 local small_noise_factor = fnp.small_noise_factor
+local waves = fnp.waves
 
 local functions = require("functions")
 local floorDiv = functions.floorDiv
@@ -155,6 +156,21 @@ data:extend{
                     isYNegative
             return modulo(distance(cellX, cellY - isYNegative, "chessboard") + specialFactor, 2) *
                        height * -2 + height
+        end)
+    }, {
+        type = "noise-expression",
+        name = "waves",
+        intended_property = "elevation",
+        expression = noise.define_noise_function(function(x, y, tile, map)
+            local cellX = floorDiv(x, size)
+            local cellY = floorDiv(y, size)
+            local localX = modulo(x, size)
+            local localY = modulo(y, size)
+            local isYNegative = -noise.clamp(cellY, -1, 0)
+            local height = size / 2 - distance(localX - size / 2, localY - size / 2, "chessboard")
+            height = -5
+
+            return 10 * waves(cellX, cellY) - 5
         end)
     } --[[{
         type = "noise-expression",
