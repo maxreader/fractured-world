@@ -15,7 +15,7 @@ mgp["fractured-world-circles"] = {
     order = "i",
     basic_settings = {
         property_expression_names = {
-            elevation = "voronoi-circles",
+            elevation = "fractured-world-circles",
             moisture = "voronoi-value-circles",
             temperature = "new-temperature",
             aux = "new-aux"
@@ -36,9 +36,21 @@ mgp["fractured-world-squares"] = {
         cliff_settings = {richness = 0}
     }
 }
+mgp["fractured-world-brick"] = {
+    order = "k",
+    basic_settings = {
+        property_expression_names = {
+            elevation = "brick",
+            moisture = "value-brick",
+            temperature = "new-temperature",
+            aux = "new-aux"
+        },
+        cliff_settings = {richness = 0}
+    }
+}
 
 mgp["fractured-world-diamonds"] = {
-    order = "j",
+    order = "l",
     basic_settings = {
         property_expression_names = {
             elevation = "voronoi-diamonds",
@@ -51,7 +63,7 @@ mgp["fractured-world-diamonds"] = {
 }
 
 mgp["fractured-world-spiral"] = {
-    order = "k",
+    order = "m",
     basic_settings = {
         property_expression_names = {
             elevation = "spiral",
@@ -64,11 +76,23 @@ mgp["fractured-world-spiral"] = {
 }
 
 mgp["fractured-world-waves"] = {
-    order = "l",
+    order = "n",
     basic_settings = {
         property_expression_names = {
             elevation = "waves",
             moisture = "voronoi-value-squares",
+            temperature = "new-temperature",
+            aux = "new-aux"
+        },
+        cliff_settings = {richness = 0}
+    }
+}
+mgp["fractured-world-hexagons"] = {
+    order = "n",
+    basic_settings = {
+        property_expression_names = {
+            elevation = "hexagons",
+            moisture = "value-hexagons",
             temperature = "new-temperature",
             aux = "new-aux"
         },

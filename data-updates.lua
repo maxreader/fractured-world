@@ -111,8 +111,6 @@ for ore, _ in pairs(currentResourceData) do
     }
     ore_property_expressions["entity:" .. ore .. ":probability"] = probName
     ore_property_expressions["entity:" .. ore .. ":richness"] = richName
-    --[[resources[ore].autoplace.probability_expression = get_probability(ore)
-    resources[ore].autoplace.richness_expression = get_richness(ore)]]
 end
 
 for name, preset in pairs(data.raw["map-gen-presets"].default) do
