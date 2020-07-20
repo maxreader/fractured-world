@@ -51,7 +51,7 @@ for ore, oreData in pairs(currentResourceData) do
     oreData.endLevel = oreData.endLevel / (oreCountMultiplier) * overallFrequency
 end
 
-local aux = 1 - noise.var("new-aux")
+local aux = 1 - noise.var("fractured-world-aux")
 local function get_probability(ore)
     local oreData = currentResourceData[ore]
     local randProb = oreData.randProb or 1
