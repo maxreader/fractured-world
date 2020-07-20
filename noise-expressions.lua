@@ -2,7 +2,6 @@ local noise = require("noise")
 local tne = noise.to_noise_expression
 
 local fnp = require("fractured-noise-programs")
-local get_closest_point = fnp.get_closest_point
 local get_closest_point_and_value = fnp.get_closest_point_and_value
 local get_closest_two_points = fnp.get_closest_two_points
 local small_noise_factor = fnp.small_noise_factor
@@ -19,6 +18,91 @@ local temperatureFloor = -25
 if mods["alien-biomes"] then
     temperatureRange = 170
     temperatureFloor = -20
+end
+
+local fracturedWorlds = {
+    ["default"] = {class = "two-point", waterInfluence = 4},
+    ["circles"] = {},
+    ["squares"] = {distanceType = "chessboard"},
+    ["diamonds"] = {distanceType = "rectilinear"},
+    ["bricks"] = {
+        distanceType = "chessboard",
+        pointType = "brick"
+    },
+    ["hexagons"] = {
+        class = "two-point",
+        pointType = "hexagon",
+        waterOffset = 150,
+        aspectRatio = math.sqrt(3 / 4)
+    }
+}
+
+local function make_fractured_world(name, params)
+    local class = params.class or "one-point"
+    local distanceType = params.distanceType or "euclidean"
+    local pointType = params.pointType or "random"
+    local waterInfluence = params.waterInfluence or 6
+    local waterOffset = params.waterOffset or 100
+    local aspectRatio = params.aspectRatio or 1
+    local elevation
+    local value
+
+    local scale = noise.var("segmentation_multiplier")
+    local x = noise.var("x")
+    local y = noise.var("y") * aspectRatio
+    local waterSlider = noise.var("wlc_elevation_offset")
+
+    if class == "one-point" then
+        local point = get_closest_point_and_value(x, y, distanceType, pointType)
+        elevation = (waterSlider * waterInfluence - 2 * point.distance * scale + defaultSize / 2 +
+                        noise.var("small-noise") / 15 * small_noise_factor + waterOffset)
+        value = point.value
+    elseif class == "two-point" then
+        local points = get_closest_two_points(x, y, distanceType, pointType)
+        local d1 = points.distance
+        local d2 = points.secondDistance
+        elevation = (waterInfluence * waterSlider - (d1 - d2) * scale) - defaultSize / 2 +
+                        noise.var("small-noise") / 15 * small_noise_factor + waterOffset
+        value = points.value
+    end
+
+    data:extend{
+        {
+            type = "noise-expression",
+            name = "fractured-world-" .. name,
+            intended_property = "elevation",
+            expression = elevation
+        }, {
+            type = "noise-expression",
+            name = "fractured-world-value-" .. name,
+            intended_property = "moisture",
+            expression = value
+        }
+    }
+end
+for name, params in pairs(fracturedWorlds) do make_fractured_world(name, params) end
+
+local cellularWorlds = {
+    ["spiral"] = fnp.on_spiral,
+    ["waves"] = fnp.waves
+}
+for name, generating_function in pairs(cellularWorlds) do
+    data:extend{
+        {
+            type = "noise-expression",
+            name = "fractured-world-" .. name,
+            intended_property = "elevation",
+            expression = noise.define_noise_function(
+                function(x, y, tile, map)
+                    local cellX = floorDiv(x, size)
+                    local cellY = floorDiv(y, size)
+                    local localX = noise.absolute_value(modulo(x, size) - size / 2) - 1
+                    local localY = noise.absolute_value(modulo(y, size) - size / 2) - 1
+                    local height = size / 2 - distance(localX, localY, "chessboard")
+                    return generating_function(cellX, cellY) * height * -2 + height - 1
+                end)
+        }
+    }
 end
 
 data:extend{
@@ -38,120 +122,11 @@ data:extend{
         expression = noise.to_noise_expression(0)
     }, {
         type = "noise-expression",
-        name = "fractured-world-circles",
-        intended_property = "elevation",
-        expression = noise.define_noise_function(function(x, y, tile, map)
-            local point = get_closest_point(x, y)
-            return
-                (map.wlc_elevation_offset * 6 - 2 * point.distance * map.segmentation_multiplier +
-                    defaultSize / 2 + noise.var("small-noise") / 15 * small_noise_factor + 100)
-        end)
-    }, {
-        type = "noise-expression",
-        name = "voronoi-squares",
-        intended_property = "elevation",
-        expression = noise.define_noise_function(function(x, y, tile, map)
-            local point = get_closest_point(x, y, "chessboard")
-            return
-                (map.wlc_elevation_offset * 6 - 2 * point.distance * map.segmentation_multiplier +
-                    defaultSize / 2 + noise.var("small-noise") / 15 * small_noise_factor + 100)
-        end)
-    }, {
-        type = "noise-expression",
-        name = "brick",
-        intended_property = "elevation",
-        expression = noise.define_noise_function(function(x, y, tile, map)
-            local point = get_closest_point(x, y, "chessboard", "brick")
-            return
-                (map.wlc_elevation_offset * 6 - 2 * point.distance * map.segmentation_multiplier +
-                    defaultSize / 2 + noise.var("small-noise") / 15 * small_noise_factor + 100)
-        end)
-    }, {
-        type = "noise-expression",
-        name = "hexagons",
-        intended_property = "elevation",
-        expression = noise.define_noise_function(function(x, y, tile, map)
-            y = y * math.sqrt(3 / 4)
-            local result = get_closest_two_points(x, y, "euclidean", "hexagon")
-            local d1 = result.distance
-            local d2 = result.secondDistance
-            return (7 * map.wlc_elevation_offset - (d1 - d2) * map.segmentation_multiplier) -
-                       defaultSize / 2 + noise.var("small-noise") / 15 * small_noise_factor + 150
-        end)
-    }, {
-        type = "noise-expression",
-        name = "voronoi-diamonds",
-        intended_property = "elevation",
-        expression = noise.define_noise_function(function(x, y, tile, map)
-            local point = get_closest_point(x, y, "rectilinear")
-            return
-                (map.wlc_elevation_offset * 6 - 2 * point.distance * map.segmentation_multiplier +
-                    defaultSize / 2 + noise.var("small-noise") / 15 * small_noise_factor + 100)
-        end)
-    }, {
-        type = "noise-expression",
-        name = "ridged-voronoi",
+        name = "fractured-world-concentric-circles",
         intended_property = "elevation",
         expression = noise.define_noise_function(function(x, y, tile, map)
             local voronoi = noise.var("fractured-world-circles")
             return noise.ridge(voronoi, -10, 20)
-        end)
-    }, {
-        type = "noise-expression",
-        name = "voronoi-border",
-        intended_property = "elevation",
-        expression = noise.define_noise_function(function(x, y, tile, map)
-            local result = get_closest_two_points(x, y)
-            local d1 = result.distance
-            local d2 = result.secondDistance
-            return (4 * map.wlc_elevation_offset - (d1 - d2) * map.segmentation_multiplier) -
-                       defaultSize / 2 + noise.var("small-noise") / 15 * small_noise_factor + 100
-        end)
-    }, {
-        type = "noise-expression",
-        name = "voronoi-value-circles",
-        intended_property = "moisture",
-        expression = noise.define_noise_function(function(x, y, tile, map)
-            local points = get_closest_point_and_value(x, y)
-            local value = points.value
-            return noise.absolute_value(value)
-        end)
-    }, {
-        type = "noise-expression",
-        name = "voronoi-value-squares",
-        intended_property = "moisture",
-        expression = noise.define_noise_function(function(x, y, tile, map)
-            local points = get_closest_point_and_value(x, y, "chessboard")
-            local value = points.value
-            return noise.absolute_value(value)
-        end)
-    }, {
-        type = "noise-expression",
-        name = "value-brick",
-        intended_property = "moisture",
-        expression = noise.define_noise_function(function(x, y, tile, map)
-            local points = get_closest_point_and_value(x, y, "chessboard", "brick")
-            local value = points.value
-            return noise.absolute_value(value)
-        end)
-    }, {
-        type = "noise-expression",
-        name = "value-hexagons",
-        intended_property = "moisture",
-        expression = noise.define_noise_function(function(x, y, tile, map)
-            y = y * math.sqrt(3 / 4)
-            local points = get_closest_point_and_value(x, y, "euclidean", "hexagon")
-            local value = points.value
-            return noise.absolute_value(value)
-        end)
-    }, {
-        type = "noise-expression",
-        name = "voronoi-value-diamonds",
-        intended_property = "moisture",
-        expression = noise.define_noise_function(function(x, y, tile, map)
-            local points = get_closest_point_and_value(x, y, "rectilinear")
-            local value = points.value
-            return noise.absolute_value(value)
         end)
     }, {
         type = "noise-expression",
@@ -179,18 +154,17 @@ data:extend{
                 octave_input_scale_multiplier = tne(0.8)
             }
         }
-    }, {
+    } --[[{
         type = "noise-expression",
         name = "spiral",
         intended_property = "elevation",
         expression = noise.define_noise_function(function(x, y, tile, map)
             local cellX = floorDiv(x, size)
             local cellY = floorDiv(y, size)
-            local localX = modulo(x, size)
-            local localY = modulo(y, size)
-            local height = size / 2 - distance(localX - size / 2, localY - size / 2, "chessboard")
-            height = -5
-            return fnp.on_spiral(cellX, cellY) * height * -2 + height
+            local localX = noise.absolute_value(modulo(x, size) - size / 2) - 1
+            local localY = noise.absolute_value(modulo(y, size) - size / 2) - 1
+            local height = size / 2 - distance(localX, localY, "chessboard")
+            return fnp.on_spiral(cellX, cellY) * height * -2 + height - 1
         end)
     }, {
         type = "noise-expression",
@@ -199,20 +173,12 @@ data:extend{
         expression = noise.define_noise_function(function(x, y, tile, map)
             local cellX = floorDiv(x, size)
             local cellY = floorDiv(y, size)
-            local localX = modulo(x, size)
-            local localY = modulo(y, size)
-            local height = size / 2 - distance(localX - size / 2, localY - size / 2, "chessboard")
+            local localX = noise.absolute_value(modulo(x, size) - size / 2) - 1
+            local localY = noise.absolute_value(modulo(y, size) - size / 2) - 1
+            local height = size / 2 - distance(localX, localY, "chessboard")
             height = -5
 
             return 10 * fnp.waves(cellX, cellY) - 5
-        end)
-    } --[[{
-        type = "noise-expression",
-        name = "hilbert",
-        intended_property = "elevation",
-        expression = noise.define_noise_function(function(x, y, tile, map)
-            y = 0 - y
-            return 10 * my_hilbert(floorDiv(x, size) + n / 2, floorDiv(y, size) + n / 2, n) - 5
         end)
     }]]
 

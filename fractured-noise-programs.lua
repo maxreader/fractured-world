@@ -13,11 +13,12 @@ local defaultSize = 256
 
 local size = defaultSize / noise.var("segmentation_multiplier")
 local small_noise_factor = noise.get_control_setting("island-randomness").size_multiplier
+local ssnf = functions.sliderToScale("control-setting:island-randomness:size:multiplier")
 
 local function waves(x, y)
-    x = modulo(x, 4) * (1 - small_noise_factor) + modulo(y, 4) * small_noise_factor
-    y = modulo(y, 4) * (1 - small_noise_factor) + modulo(x, 4) * small_noise_factor
-    return noise.clamp(greaterThan(y, 0) - modulo(x, 2) * (1 - equalTo(y, x)), 0, 1)
+    x = modulo(x, 4) * (1 - ssnf) + modulo(y, 4) * ssnf
+    y = modulo(y, 4) * (1 - ssnf) + modulo(x, 4) * ssnf
+    return 1 - noise.clamp(greaterThan(y, 0) - modulo(x, 2) * (1 - equalTo(y, x)), 0, 1)
 end
 
 local function get_brick_point(x, y, width)
