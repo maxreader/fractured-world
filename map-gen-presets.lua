@@ -10,13 +10,9 @@ local preset_properties = {
         size = 1 / 6,
         water = 1 / 4
     },
-    ["spiral"] = {
-        frequency = 6,
-        size = 3,
-        moisture = "squares"
-    },
+    ["spiral"] = {frequency = 6, moisture = "squares"},
     ["waves"] = {
-        frequency = 1,
+        frequency = 6,
         size = 6,
         moisture = "squares"
     }
@@ -28,7 +24,7 @@ for name, properties in pairs(preset_properties) do
     local water = properties.water or 1
     local elevation = "fractured-world-" .. name
     local moisture
-    if properties.moisture == "square" then
+    if properties.moisture == "squares" then
         moisture = "fractured-world-value-squares"
     else
         moisture = "fractured-world-value-" .. name
@@ -40,8 +36,8 @@ for name, properties in pairs(preset_properties) do
             property_expression_names = {
                 elevation = elevation,
                 moisture = moisture,
-                temperature = "new-temperature",
-                aux = "new-aux"
+                temperature = "fractured-world-temperature",
+                aux = "fractured-world-aux"
             },
             cliff_settings = {richness = 0},
             autoplace_controls = {
@@ -55,153 +51,3 @@ for name, properties in pairs(preset_properties) do
     }
     count = count + 1
 end
-
---[[mgp["fractured-world-default"] = {
-    order = "h",
-    basic_settings = {
-        property_expression_names = {
-            elevation = "fractured-world-default",
-            moisture = "fractured-world-value-default",
-            temperature = "new-temperature",
-            aux = "new-aux"
-        },
-        cliff_settings = {richness = 0},
-        autoplace_controls = {
-            ["island-randomness"] = {
-                frequency = 1 / 6,
-                size = 3
-            }
-        }
-    }
-}
-mgp["fractured-world-circles"] = {
-    order = "i",
-    basic_settings = {
-        property_expression_names = {
-            elevation = "fractured-world-circles",
-            moisture = "fractured-world-value-circles",
-            temperature = "new-temperature",
-            aux = "new-aux"
-        },
-        cliff_settings = {richness = 0},
-        autoplace_controls = {
-            ["island-randomness"] = {
-                frequency = 1 / 6,
-                size = 3
-            }
-        }
-    }
-}
-
-mgp["fractured-world-squares"] = {
-    order = "j",
-    basic_settings = {
-        property_expression_names = {
-            elevation = "fractured-world-squares",
-            moisture = "fractured-world-value-squares",
-            temperature = "new-temperature",
-            aux = "new-aux"
-        },
-        cliff_settings = {richness = 0},
-        autoplace_controls = {
-            ["island-randomness"] = {
-                frequency = 1 / 6,
-                size = 3
-            }
-        }
-    }
-}
-mgp["fractured-world-bricks"] = {
-    order = "k",
-    basic_settings = {
-        property_expression_names = {
-            elevation = "fractured-world-bricks",
-            moisture = "fractured-world-value-bricks",
-            temperature = "new-temperature",
-            aux = "new-aux"
-        },
-        cliff_settings = {richness = 0},
-        autoplace_controls = {
-            ["island-randomness"] = {
-                frequency = 6,
-                size = 3 / 2
-            }
-        }
-    }
-}
-
-mgp["fractured-world-diamonds"] = {
-    order = "l",
-    basic_settings = {
-        property_expression_names = {
-            elevation = "fractured-world-diamonds",
-            moisture = "fractured-world-value-diamonds",
-            temperature = "new-temperature",
-            aux = "new-aux"
-        },
-        cliff_settings = {richness = 0},
-        autoplace_controls = {
-            ["island-randomness"] = {
-                frequency = 1 / 6,
-                size = 3
-            }
-        }
-    }
-}
-
-mgp["fractured-world-spiral"] = {
-    order = "m",
-    basic_settings = {
-        property_expression_names = {
-            elevation = "fractured-world-spiral",
-            moisture = "fractured-world-value-squares",
-            temperature = "new-temperature",
-            aux = "new-aux"
-        },
-        cliff_settings = {richness = 0},
-        autoplace_controls = {
-            ["island-randomness"] = {
-                frequency = 6,
-                size = 3
-            }
-        }
-    }
-}
-
-mgp["fractured-world-waves"] = {
-    order = "n",
-    basic_settings = {
-        property_expression_names = {
-            elevation = "fractured-world-waves",
-            moisture = "fractured-world-value-squares",
-            temperature = "new-temperature",
-            aux = "new-aux"
-        },
-        cliff_settings = {richness = 0},
-        autoplace_controls = {
-            ["island-randomness"] = {
-                frequency = 1,
-                size = 6
-            }
-        }
-    }
-}
-mgp["fractured-world-hexagons"] = {
-    order = "n",
-    basic_settings = {
-        property_expression_names = {
-            elevation = "fractured-world-hexagons",
-            moisture = "fractured-world-value-hexagons",
-            temperature = "new-temperature",
-            aux = "new-aux"
-        },
-        cliff_settings = {richness = 0},
-        autoplace_controls = {
-            ["island-randomness"] = {
-                frequency = 6,
-                size = 1 / 6
-            }
-        },
-        water = 1 / 4
-    }
-}]]

@@ -111,7 +111,10 @@ data:extend{
         name = "island-randomness",
         richness = false,
         order = "d-a",
-        category = "terrain"
+        category = "terrain",
+        localised_description = {
+            "autoplace-control-description.island-randomness"
+        }
     }, {
         type = "noise-expression",
         name = "control-setting:island-randomness:frequency:multiplier",
@@ -130,11 +133,11 @@ data:extend{
         end)
     }, {
         type = "noise-expression",
-        name = "new-temperature",
+        name = "fractured-world-temperature",
         expression = modulo(noise.var("moisture")) * temperatureRange + temperatureFloor
     }, {
         type = "noise-expression",
-        name = "new-aux",
+        name = "fractured-world-aux",
         expression = modulo(noise.var("moisture") * 134)
     }, {
         type = "noise-expression",
@@ -154,32 +157,5 @@ data:extend{
                 octave_input_scale_multiplier = tne(0.8)
             }
         }
-    } --[[{
-        type = "noise-expression",
-        name = "spiral",
-        intended_property = "elevation",
-        expression = noise.define_noise_function(function(x, y, tile, map)
-            local cellX = floorDiv(x, size)
-            local cellY = floorDiv(y, size)
-            local localX = noise.absolute_value(modulo(x, size) - size / 2) - 1
-            local localY = noise.absolute_value(modulo(y, size) - size / 2) - 1
-            local height = size / 2 - distance(localX, localY, "chessboard")
-            return fnp.on_spiral(cellX, cellY) * height * -2 + height - 1
-        end)
-    }, {
-        type = "noise-expression",
-        name = "waves",
-        intended_property = "elevation",
-        expression = noise.define_noise_function(function(x, y, tile, map)
-            local cellX = floorDiv(x, size)
-            local cellY = floorDiv(y, size)
-            local localX = noise.absolute_value(modulo(x, size) - size / 2) - 1
-            local localY = noise.absolute_value(modulo(y, size) - size / 2) - 1
-            local height = size / 2 - distance(localX, localY, "chessboard")
-            height = -5
-
-            return 10 * fnp.waves(cellX, cellY) - 5
-        end)
-    }]]
-
+    }
 }
