@@ -1,2 +1,44 @@
 [map-gen-preset-name]
-fractured-preset=Fractured
+fractured-world-default=Default fractured world
+fractured-world-circles=Circles
+fractured-world-squares=Squares
+fractured-world-diamonds=Diamonds
+fractured-world-bricks=Bricks
+fractured-world-hexagons=Hexagons
+fractured-world-spiral=Spiral
+fractured-world-waves=Waves
+
+[map-gen-preset-description]
+fractured-world-default=Default fractured world
+fractured-world-circles=Spreads circles of land around the map
+fractured-world-squares=Drops squares of land in a grid. Can be randomized
+fractured-world-diamonds=Spreads diamonds of land around the map
+fractured-world-bricks=Places a brick pattern on the map. The pattern can be flipped with the "Fractured world scale" slider
+fractured-world-hexagons=Places a hexagon pattern on the map
+fractured-world-spiral=Turns the map into a spiral
+fractured-world-waves=Stacks waves on the map
+
+[noise-expression]
+fractured-world-default=Default fractured world
+fractured-world-circles=Circles
+fractured-world-squares=Squares
+fractured-world-diamonds=Diamonds
+fractured-world-bricks=Bricks
+fractured-world-hexagons=Hexagons
+fractured-world-spiral=Spiral
+fractured-world-waves=Waves
+
+fractured-world-value-default=Default fractured world
+fractured-world-value-circles=Circles
+fractured-world-value-squares=Squares
+fractured-world-value-diamonds=Diamonds
+fractured-world-value-bricks=Bricks
+fractured-world-value-hexagons=Hexagons
+fractured-world-value-spiral=Spiral
+fractured-world-value-waves=Waves
+
+[autoplace-control-names]
+island-randomness=Fractured world parameters
+
+[gui-map-generator]
+island-randomness-description=Parameters for Fractured World.\nScale typically adjusts the large scale randomness, while coverage adjust small scall randomness. Some presets use them slightly differently, so experiment!
