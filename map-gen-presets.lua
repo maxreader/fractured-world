@@ -51,3 +51,14 @@ for name, properties in pairs(preset_properties) do
     }
     count = count + 1
 end
+
+--[[mgp["fw-debug"] = {
+    order = "h",
+    basic_settings = {
+        property_expression_names = {
+            ["entity:iron-ore:richness"] = "if-else-chain-test",
+            ["entity:iron-ore:probability"] = 10,
+            elevation = 10
+        }
+    }
+}]]
