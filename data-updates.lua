@@ -3,6 +3,7 @@ local tne = noise.to_noise_expression
 local rawResourceData = require("raw-resource-data")
 local resources = data.raw['resource']
 local currentResourceData = {}
+require("enemies")
 for k, v in pairs(rawResourceData) do
     if mods[k] then
         for ore, oreData in pairs(v) do
@@ -15,8 +16,9 @@ local starting_patches = resource_autoplace__patch_metasets.starting.patch_set_i
 local regular_patches = resource_autoplace__patch_metasets.regular.patch_set_indexes
 
 for ore, index in pairs(regular_patches) do
-    if not currentResourceData[ore] then currentResourceData[ore] =
-        {density = 4} end
+    if resources[ore] and not currentResourceData[ore] then
+        currentResourceData[ore] = {density = 4}
+    end
 end
 --[[
 default settings: approx 64 islands/km2

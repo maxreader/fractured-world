@@ -92,14 +92,14 @@ return {
             postMult = 0.03
         }
     },
-    --[[angelsinfiniteore = {
+    angelsinfiniteores = {
         ["infinite-angels-ore1"] = {density = 5},
         ["infinite-angels-ore2"] = {density = 5},
         ["infinite-angels-ore3"] = {density = 5},
         ["infinite-angels-ore4"] = {density = 5},
         ["infinite-angels-ore5"] = {density = 5},
         ["infinite-angels-ore6"] = {density = 5}
-    },]]
+    },
     Krastorio2 = {
         ["immersite"] = {
             density = 1,
