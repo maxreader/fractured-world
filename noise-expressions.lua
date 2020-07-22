@@ -46,6 +46,7 @@ local function make_fractured_world(name, params)
     local aspectRatio = params.aspectRatio or 1
     local elevation
     local value
+    local pointDistance
 
     local scale = noise.var("segmentation_multiplier")
     local x = noise.var("x")
@@ -57,6 +58,7 @@ local function make_fractured_world(name, params)
         elevation = (waterSlider * waterInfluence - 2 * point.distance * scale + defaultSize / 2 +
                         noise.var("small-noise") / 15 * small_noise_factor + waterOffset)
         value = point.value
+        pointDistance = point.distance
     elseif class == "two-point" then
         local points = get_closest_two_points(x, y, distanceType, pointType)
         local d1 = points.distance
@@ -64,6 +66,7 @@ local function make_fractured_world(name, params)
         elevation = (waterInfluence * waterSlider - (d1 - d2) * scale) - defaultSize / 2 +
                         noise.var("small-noise") / 15 * small_noise_factor + waterOffset
         value = points.value
+        pointDistance = points.distance
     end
 
     data:extend{
@@ -77,6 +80,11 @@ local function make_fractured_world(name, params)
             name = "fractured-world-value-" .. name,
             intended_property = "moisture",
             expression = value
+        }, {
+            type = "noise-expression",
+            name = "fractured-world-point-distance-" .. name,
+            intended_property = "fw-distance",
+            expression = pointDistance
         }
     }
 end
@@ -157,5 +165,11 @@ data:extend{
                 octave_input_scale_multiplier = tne(0.8)
             }
         }
+    }, {
+        type = "noise-expression",
+        name = "ridges",
+        intended_property = "elevation",
+        expression = (fnp.make_ridges(4, 10, 0.5, 0.5) * 100 - 50) * functions.rof ^ 0.5 +
+            (size - fnp.make_grid() + 25.6) * (1 - functions.rof ^ 0.5) / 51.2 + 5
     }
 }

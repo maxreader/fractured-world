@@ -196,6 +196,41 @@ local function get_closest_two_points(x, y, distanceType, pointType)
     }
 end
 
+local function make_ridges(octaves, baseAmplitude, persistence, amplitudeScaling)
+    local result = 0
+    octaves = octaves or 1
+    local amplitude = baseAmplitude or 1
+    local scale = size
+    persistence = persistence or 0.5
+    amplitudeScaling = amplitudeScaling or 0.5
+    local maximum = amplitude * octaves
+    for i = 0, octaves do
+        local expression = tne {
+            type = "function-application",
+            function_name = "factorio-basis-noise",
+            arguments = {
+                x = tne(noise.var("x") + i * scale * 1000),
+                y = tne(noise.var("y")),
+                seed0 = tne(noise.var("map_seed")),
+                seed1 = tne(142),
+                input_scale = tne(1 / scale),
+                output_scale = tne(1)
+            }
+        }
+        result = result + amplitude * noise.absolute_value(expression)
+        amplitude = amplitude * amplitudeScaling
+        scale = scale / persistence
+    end
+    return (1 - 2 * result / maximum) ^ 2
+end
+
+local function make_grid()
+    return noise.min(noise.ridge(noise.var("x") * noise.var("segmentation_multiplier"), 0,
+                                 defaultSize) *
+                         noise.ridge(noise.var("y") * noise.var("segmentation_multiplier"), 0,
+                                     defaultSize))
+end
+
 return {
     waves = waves,
     on_spiral = on_spiral,
@@ -204,5 +239,7 @@ return {
     get_closest_two_points = get_closest_two_points,
     defaultSize = defaultSize,
     size = size,
-    small_noise_factor = small_noise_factor
+    small_noise_factor = small_noise_factor,
+    make_ridges = make_ridges,
+    make_grid = make_grid
 }
