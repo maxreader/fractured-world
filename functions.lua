@@ -18,7 +18,7 @@ end
 
 local function bitwiseAND(x1, x2)
     -- assume x1 and x2 are both integers
-    if not x1 and x2 then return 0 end
+    if not (x1 and x2) then return 0 end
     x1 = floorDiv(x1)
     x2 = floorDiv(x2)
     local result = 0
@@ -32,7 +32,7 @@ end
 
 local function bitwiseXOR(x1, x2)
     -- assume x1 and x2 are both integers
-    if not x1 and x2 then return 0 end
+    if not (x1 and x2) then return 0 end
     x1 = floorDiv(x1)
     x2 = floorDiv(x2)
     local result = 0
@@ -104,7 +104,7 @@ local function pseudo_random(x, y)
     local x0 = noise.var("map_seed") / 2 ^ 32
     local y0 = tne(0.234561)
     local angle = (x * x0 + y * y0)
-    return modulo(pseudo_sin(angle * 8969))
+    return modulo(pseudo_sin(angle * 5000))
 end
 
 ---@param width integer
