@@ -16,7 +16,7 @@
         "mods",
         "log"
     ],
-    "vscode-lua-format.configPath": ".vscode/style.txt",
+    "vscode-lua-format.configPath": "C:/Users/travi/AppData/Roaming/Factorio/mods/fractured-world/.vscode/style.txt",
     "factorio.portal.username": "travis.aelvoet@gmail.com",
     "factorio.portal.password": "Enderdragon1!",
     "factorio.package.onExplorer": true
