@@ -83,7 +83,7 @@ local function make_fractured_world(name, params)
         }, {
             type = "noise-expression",
             name = "fractured-world-point-distance-" .. name,
-            intended_property = "fw-distance",
+            intended_property = "fw_distance",
             expression = pointDistance
         }
     }
@@ -171,5 +171,10 @@ data:extend{
         intended_property = "elevation",
         expression = (fnp.make_ridges(4, 10, 0.5, 0.5) * 100 - 50) * functions.rof ^ 0.5 +
             (size - fnp.make_grid() + 25.6) * (1 - functions.rof ^ 0.5) / 51.2 + 5
+    }, {
+        type = "noise-expression",
+        name = "fw_distance",
+        intended_property = "fw_distance",
+        expression = tne(0)
     }
 }
