@@ -1,14 +1,14 @@
 local noise = require("noise")
 local tne = noise.to_noise_expression
 
-local fnp = require("fractured-noise-programs")
+local fnp = require("prototypes.fractured-noise-programs")
 local get_closest_point_and_value = fnp.get_closest_point_and_value
 local get_closest_two_points = fnp.get_closest_two_points
 local small_noise_factor = fnp.small_noise_factor
 local defaultSize = fnp.defaultSize
 local size = fnp.size
 
-local functions = require("functions")
+local functions = require("prototypes.functions")
 local floorDiv = functions.floorDiv
 local modulo = functions.modulo
 local distance = functions.distance

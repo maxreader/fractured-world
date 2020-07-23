@@ -1,6 +1,6 @@
 local noise = require("noise")
 local tne = noise.to_noise_expression
-local functions = require("functions")
+local functions = require("prototypes.functions")
 local floorDiv = functions.floorDiv
 local modulo = functions.modulo
 local greaterThan = functions.greaterThan

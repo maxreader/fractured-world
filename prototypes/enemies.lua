@@ -1,7 +1,7 @@
 local noise = require("noise")
 local tne = noise.to_noise_expression
-local functions = require("functions")
-local fnp = require("fractured-noise-programs")
+local functions = require("prototypes.functions")
+local fnp = require("prototypes.fractured-noise-programs")
 local distance = noise.max(noise.var("distance") - noise.var("starting_area_radius"), 0)
 local frequencySlider = functions.sliderToScale("control-setting:enemy-base:frequency:multiplier")
 local sizeSlider = functions.sliderToScale("control-setting:enemy-base:size:multiplier")

@@ -1,2 +1,2 @@
-require("noise-expressions")
-require("map-gen-presets")
+require("prototypes.noise-expressions")
+require("prototypes.map-gen-presets")
