@@ -23,11 +23,11 @@ for name, properties in pairs(preset_properties) do
     local size = properties.size or 3
     local water = properties.water or 1
     local elevation = "fractured-world-" .. name
-    local moisture
+    local fw_distance = "fractured-world-point-distance-" .. name
+    local moisture = "fractured-world-value-" .. name
     if properties.moisture == "squares" then
         moisture = "fractured-world-value-squares"
-    else
-        moisture = "fractured-world-value-" .. name
+        fw_distance = "fractured-world-point-distance-squares"
     end
 
     mgp["fractured-world-" .. name] = {
@@ -37,7 +37,8 @@ for name, properties in pairs(preset_properties) do
                 elevation = elevation,
                 moisture = moisture,
                 temperature = "fractured-world-temperature",
-                aux = "fractured-world-aux"
+                aux = "fractured-world-aux",
+                fw_distance = fw_distance
             },
             cliff_settings = {richness = 0},
             autoplace_controls = {

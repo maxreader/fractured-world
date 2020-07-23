@@ -3,7 +3,7 @@ local tne = noise.to_noise_expression
 local rawResourceData = require("raw-resource-data")
 local resources = data.raw['resource']
 local currentResourceData = {}
-require("enemies")
+local enemyData = require("enemies")
 for k, v in pairs(rawResourceData) do
     if mods[k] then
         for ore, oreData in pairs(v) do
@@ -45,12 +45,12 @@ end
 
 local maxPatchesPerKm2 = 4
 local overallFrequency = maxPatchesPerKm2 / 64
-local oreCountMultiplier = noise.max(1, oreCount / maxPatchesPerKm2)
+local oreCountMultiplier = noise.delimit_procedure(noise.max(1, oreCount / maxPatchesPerKm2))
 
 -- scale startLevel and endLevel so that the desired overall frequency of islands have ore
 for ore, oreData in pairs(currentResourceData) do
-    oreData.startLevel = oreData.startLevel / (oreCountMultiplier) * overallFrequency
-    oreData.endLevel = oreData.endLevel / (oreCountMultiplier) * overallFrequency
+    oreData.startLevel = tne(oreData.startLevel) / (oreCountMultiplier) * overallFrequency
+    oreData.endLevel = tne(oreData.endLevel) / (oreCountMultiplier) * overallFrequency
 end
 
 local aux = 1 - noise.var("fractured-world-aux")
@@ -96,7 +96,7 @@ local function get_richness(ore)
                    landDensity + addRich) * postMult, minimumRichness)
 end
 
-local ore_property_expressions = {}
+local fw_property_expressions = {}
 for ore, _ in pairs(currentResourceData) do
     local probName = "fractured-world-" .. ore .. "-probability"
     local richName = "fractured-world-" .. ore .. "-richness"
@@ -111,13 +111,27 @@ for ore, _ in pairs(currentResourceData) do
             expression = get_richness(ore)
         }
     }
-    ore_property_expressions["entity:" .. ore .. ":probability"] = probName
-    ore_property_expressions["entity:" .. ore .. ":richness"] = richName
+    fw_property_expressions["entity:" .. ore .. ":probability"] = probName
+    fw_property_expressions["entity:" .. ore .. ":richness"] = richName
+end
+
+for _, enemyType in pairs(enemyData) do
+    for name, v in pairs(enemyType) do
+        local probName = "fractured-world-" .. name .. "-probability"
+        data:extend{
+            {
+                type = "noise-expression",
+                name = probName,
+                expression = v.probability_expression
+            }
+        }
+        fw_property_expressions["entity:" .. name .. ":probability"] = probName
+    end
 end
 
 for name, preset in pairs(data.raw["map-gen-presets"].default) do
     if string.match(name, "fractured%-world") then
-        for k, v in pairs(ore_property_expressions) do
+        for k, v in pairs(fw_property_expressions) do
             preset.basic_settings.property_expression_names[k] = v
         end
     end

@@ -69,6 +69,10 @@ local function scale_table(values, scalar)
     return returnTable
 end
 
+local function multiply_probabilities(probabilities)
+    return reduce(function(a, b) return a * b end, probabilities)
+end
+
 local function make_interpolation(x0, y0, x1, y1)
     if not (x0 and y0) then error("Error: function make_interpolation() given invalid input") end
     x1 = x1 or 0
@@ -129,8 +133,10 @@ return {
     greaterThan = greaterThan,
     lessThan = lessThan,
     equalTo = equalTo,
+    reduce = reduce,
     get_extremum = get_extremum,
     scale_table = scale_table,
+    multiply_probabilities = multiply_probabilities,
     make_interpolation = make_interpolation,
     distance = distance,
     smoothStep = smoothStep,

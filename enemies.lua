@@ -1,65 +1,116 @@
 local noise = require("noise")
 local tne = noise.to_noise_expression
 local functions = require("functions")
-local distance = noise.var("distance")
+local fnp = require("fractured-noise-programs")
+local distance = noise.max(noise.var("distance") - noise.var("starting_area_radius"), 0)
 local frequencySlider = functions.sliderToScale("control-setting:enemy-base:frequency:multiplier")
 local sizeSlider = functions.sliderToScale("control-setting:enemy-base:size:multiplier")
+local radius = noise.var("fw_distance")
+local scaledRadius = (1 - radius / fnp.size)
 
-local thisIntensity = noise.min(distance / (32 * 75), 1) -- based on vanilla values
+local thisIntensity = noise.min(distance / (32 * 100), 1) -- based on vanilla values
+local thisSize
+local thisFrequency
+do
+    local minFrequencyNear = 0.001
+    local maxFrequencyNear = 0.1
+    local minFrequencyFar = 0.01
+    local maxFrequencyFar = 1
 
-local minFrequencyNear = 0.001
-local maxFrequencyNear = 0.1
-local minFrequencyFar = 0.1
-local maxFrequencyFar = 1
+    local get_near_frequency =
+        functions.make_interpolation(0, minFrequencyNear, 1, maxFrequencyNear)
+    local frequencyNear = get_near_frequency(frequencySlider)
+    local get_far_frequency = functions.make_interpolation(0, minFrequencyFar, 1, maxFrequencyFar)
+    local frequencyFar = get_far_frequency(frequencySlider)
+    local get_frequency = functions.make_interpolation(0, frequencyNear, 1, frequencyFar)
+    thisFrequency = noise.delimit_procedure(get_frequency(thisIntensity))
+end
+do
+    local minSizeNear = 0.01
+    local maxSizeNear = 0.3
+    local minSizeFar = 0.5
+    local maxSizeFar = 1
 
-local get_near_frequency = functions.make_interpolation(0, minFrequencyNear, 1, maxFrequencyNear)
-local frequencyNear = get_near_frequency(frequencySlider)
-local get_far_frequency = functions.make_interpolation(0, minFrequencyFar, 1, maxFrequencyFar)
-local frequencyFar = get_far_frequency(frequencySlider)
-local get_frequency = functions.make_interpolation(0, frequencyNear, 1, frequencyFar)
-local thisFrequency = get_frequency(thisIntensity)
-
-local minSizeNear = 0.001
-local maxSizeNear = 0.1
-local minSizeFar = 0.1
-local maxSizeFar = 1
-
-local get_near_size = functions.make_interpolation(0, minSizeNear, 1, maxSizeNear)
-local sizeNear = get_near_size(sizeSlider)
-local get_far_size = functions.make_interpolation(0, minSizeFar, 1, maxSizeFar)
-local sizeFar = get_far_size(sizeSlider)
-local get_size = functions.make_interpolation(0, sizeNear, 1, sizeFar)
-local thisSize = get_size(thisIntensity)
-
-local spawnerData = {}
-local totalWeight = 0
-
-local spawners = data.raw["unit-spawner"]
-for name, spawner in pairs(data.raw["unit-spawner"]) do
-    if not spawnerData[name] then spawnerData[name] =
-        {weight = 1} end
-    totalWeight = totalWeight + spawnerData[name].weight
+    local get_near_size = functions.make_interpolation(0, minSizeNear, 1, maxSizeNear)
+    local sizeNear = get_near_size(sizeSlider)
+    local get_far_size = functions.make_interpolation(0, minSizeFar, 1, maxSizeFar)
+    local sizeFar = get_far_size(sizeSlider)
+    local get_size = functions.make_interpolation(0, sizeNear, 1, sizeFar)
+    thisSize = noise.delimit_procedure(get_size(thisIntensity))
 end
 
 -- get islands that should have biters
 local moisture = noise.var("moisture")
-local islandsWithBiters = functions.lessThan(moisture, thisFrequency)
+local islandsWithBiters = noise.delimit_procedure(functions.lessThan(moisture, thisFrequency))
+local spawnerCircle = noise.delimit_procedure(functions.lessThan(thisSize, scaledRadius / 1.45))
+local wormCircle = noise.delimit_procedure(functions.lessThan(thisSize, scaledRadius / 1.3))
 
-for name, spawner in pairs(spawners) do
-    local weight = spawnerData[name].weight
-    local randProb = tne(thisSize * weight / totalWeight)
-    local autoplace = spawner.autoplace
-    if autoplace then
-        autoplace.probability_expression = islandsWithBiters * randProb * tne {
-            type = "function-application",
-            function_name = "random-penalty",
-            arguments = {
-                source = tne(1),
-                x = noise.var("x"),
-                y = noise.var("y"),
-                amplitude = tne(totalWeight)
-            }
-        }
+local count = 0
+local function make_enemy_autoplace(type, nameFilter, prototypeData, penalty_multiplier)
+    local prototypes = data.raw[type]
+    local totalWeight = 0
+    penalty_multiplier = penalty_multiplier or 1
+    for name, prototype in pairs(prototypes) do
+        if string.find(name, nameFilter) then
+            if not prototypeData[name] then prototypeData[name] = {} end
+            local thisPrototypeData = prototypeData[name]
+            thisPrototypeData.weight = thisPrototypeData.weight or 1
+            thisPrototypeData.distance_factor = thisPrototypeData.distance_factor or 0
+            totalWeight = totalWeight + thisPrototypeData.weight
+        end
+    end
+    for name, prototype in pairs(prototypes) do
+        if prototypeData[name] then
+            local autoplace = prototype.autoplace
+            if autoplace then
+                local distance_factor =
+                    (prototypeData[name] and prototypeData[name].distance_factor) or 0
+                local placeAtThisDistance = functions.greaterThan(distance,
+                                                                  distance_factor * fnp.defaultSize)
+                local penalty = tne {
+                    type = "function-application",
+                    function_name = "random-penalty",
+                    arguments = {
+                        source = tne(1),
+                        x = noise.var("x") + count,
+                        y = noise.var("y"),
+                        amplitude = tne(totalWeight * penalty_multiplier)
+                    }
+                }
+
+                local factors = {
+                    (prototypeData[name].weight / totalWeight),
+                    placeAtThisDistance, thisSize,
+                    islandsWithBiters, penalty
+                }
+                if nameFilter == "spawner" then
+                    table.insert(factors, spawnerCircle)
+                elseif nameFilter == "worm" then
+                    table.insert(factors, wormCircle)
+                end
+                prototypeData[name].probability_expression =
+                    functions.multiply_probabilities(factors)
+                data:extend{
+                    {
+                        type = "noise-expression",
+                        name = "fractured-world-" .. name .. "-probability",
+                        expression = tne(0)
+                    }
+                }
+                count = count + 1
+            end
+        end
     end
 end
 
+local turretData = {
+    ["small-worm-turret"] = {distance_factor = 0},
+    ["medium-worm-turret"] = {distance_factor = 2},
+    ["big-worm-turret"] = {distance_factor = 5},
+    ["behemoth-worm-turret"] = {distance_factor = 8}
+}
+local spawnerData = {}
+make_enemy_autoplace("unit-spawner", "spawner", spawnerData)
+make_enemy_autoplace("turret", "worm", turretData)
+
+return {spawnerData, turretData}
