@@ -9,11 +9,12 @@ local rof = functions.rof
 local get_random_point = functions.get_random_point
 local distance = functions.distance
 local get_extremum = functions.get_extremum
-local defaultSize = 256
-
-local size = defaultSize / noise.var("segmentation_multiplier")
+local size = functions.size
+local defaultSize = functions.defaultSize
 local small_noise_factor = noise.get_control_setting("island-randomness").size_multiplier
 local ssnf = functions.sliderToScale("control-setting:island-randomness:size:multiplier")
+local waterLevel = -(noise.var("wlc_elevation_offset"))
+local landDensity = noise.delimit_procedure(145 * waterLevel ^ 2 - 10660 * waterLevel + 212200)
 
 local function waves(x, y)
     x = modulo(x, 4) * (1 - ssnf) + modulo(y, 4) * ssnf
@@ -231,9 +232,15 @@ local function make_grid()
                                      defaultSize))
 end
 
+local function is_random_square()
+    local value = modulo(noise.var("moisture") * 157)
+    return functions.lessThan(value, tne(landDensity) / 1000000)
+end
+
 return {
     waves = waves,
     on_spiral = on_spiral,
+    is_random_square = is_random_square,
     get_closest_point = get_closest_point,
     get_closest_point_and_value = get_closest_point_and_value,
     get_closest_two_points = get_closest_two_points,
@@ -241,5 +248,6 @@ return {
     size = size,
     small_noise_factor = small_noise_factor,
     make_ridges = make_ridges,
-    make_grid = make_grid
+    make_grid = make_grid,
+    landDensity = landDensity
 }

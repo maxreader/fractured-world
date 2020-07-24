@@ -75,8 +75,7 @@ local function get_probability(ore)
     return probability_expression
 end
 
-local waterLevel = -(noise.var("wlc_elevation_offset"))
-local landDensity = noise.delimit_procedure(145 * waterLevel ^ 2 - 10660 * waterLevel + 212200)
+local landDensity = require("fractured-noise-programs").landDensity
 local function get_richness(ore)
     -- Get params for calculations
     local oreData = currentResourceData[ore]
