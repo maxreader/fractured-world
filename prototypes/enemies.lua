@@ -65,8 +65,7 @@ local function make_enemy_autoplace(type, prototypeData, penalty_multiplier)
         if prototypeData[name] and autoplace and (autoplace.force == "enemy") then
             local distance_factor = (prototypeData[name] and prototypeData[name].distance_factor) or
                                         0
-            local placeAtThisDistance = functions.greaterThan(distance, distance_factor *
-                                                                  functions.defaultSize)
+            local placeAtThisDistance = functions.greaterThan(distance, distance_factor * 256)
             local penalty = tne {
                 type = "function-application",
                 function_name = "random-penalty",

@@ -123,9 +123,7 @@ local function get_random_point(x, y, width)
 end
 
 local random_offset_factor = sliderToScale("control-setting:island-randomness:frequency:multiplier")
-local defaultSize = 256
-local size = defaultSize / noise.var("segmentation_multiplier")
-
+local size = noise.var("fw_default_size") / noise.var("segmentation_multiplier")
 return {
     sliderToScale = sliderToScale,
     floorDiv = floorDiv,
@@ -145,6 +143,5 @@ return {
     pseudo_random = pseudo_random,
     get_random_point = get_random_point,
     rof = random_offset_factor,
-    defaultSize = defaultSize,
     size = size
 }

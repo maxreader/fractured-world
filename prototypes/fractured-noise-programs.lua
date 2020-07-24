@@ -9,8 +9,6 @@ local rof = functions.rof
 local get_random_point = functions.get_random_point
 local distance = functions.distance
 local get_extremum = functions.get_extremum
-local size = functions.size
-local defaultSize = functions.defaultSize
 local small_noise_factor = noise.get_control_setting("island-randomness").size_multiplier
 local ssnf = functions.sliderToScale("control-setting:island-randomness:size:multiplier")
 local waterLevel = -(noise.var("wlc_elevation_offset"))
@@ -23,7 +21,7 @@ local function waves(x, y)
 end
 
 local function get_brick_point(x, y, width)
-    local val = get_random_point(x, y, size).val
+    local val = get_random_point(x, y, width).val
     local oddY = modulo(y, 2)
     local oddX = modulo(x, 2)
     local scale = rof * 2
@@ -35,7 +33,7 @@ local function get_brick_point(x, y, width)
 end
 
 local function get_hexagon_point(x, y, width)
-    local randPoint = get_random_point(x, y, size)
+    local randPoint = get_random_point(x, y, width)
     local val = randPoint.val
     local oddX = modulo(x, 2)
     y = width * oddX / 2
@@ -51,12 +49,17 @@ local function on_spiral(x, y)
     return modulo(distance(x, y - isYNegative, "chessboard") + specialFactor, 2)
 end
 
-local function get_closest_point(x, y, distanceType, pointType)
+local function is_random_square()
+    local value = modulo(noise.var("moisture") * 157)
+    return functions.lessThan(value, tne(landDensity) / 1000000)
+end
+
+local function get_closest_point(x, y, width, distanceType, pointType)
     pointType = pointType or "random"
     local distances = {}
     local count = 1
-    local cX = floorDiv(x, size)
-    local cY = floorDiv(y, size)
+    local cX = floorDiv(x, width)
+    local cY = floorDiv(y, width)
     for v = -1, 1, 1 do
         local t = tne(v) + cY
         for u = -1, 1, 1 do
@@ -65,21 +68,21 @@ local function get_closest_point(x, y, distanceType, pointType)
             local point_x
             local point_y
             if pointType == "random" then
-                point = get_random_point(s, t, size)
-                point_x = point.x * rof + size / 2 * (1 - rof)
-                point_y = point.y * rof + size / 2 * (1 - rof)
+                point = get_random_point(s, t, width)
+                point_x = point.x * rof + width / 2 * (1 - rof)
+                point_y = point.y * rof + width / 2 * (1 - rof)
             elseif pointType == "brick" then
-                point = get_brick_point(s, t, size)
+                point = get_brick_point(s, t, width)
                 point_x = point.x
                 point_y = point.y
             elseif pointType == "hexagon" then
-                point = get_hexagon_point(s, t, size)
+                point = get_hexagon_point(s, t, width)
                 point_x = point.x
                 point_y = point.y
             end
             -- shift due to randomness
-            local relativeX = size * (s) + point_x - x
-            local relativeY = size * (t) + point_y - y
+            local relativeX = width * (s) + point_x - x
+            local relativeY = width * (t) + point_y - y
             local pDistance = distance(relativeX, relativeY, distanceType)
             distances[count] = pDistance
             count = count + 1
@@ -89,13 +92,13 @@ local function get_closest_point(x, y, distanceType, pointType)
     return {distance = minDistance}
 end
 
-local function get_closest_point_and_value(x, y, distanceType, pointType)
+local function get_closest_point_and_value(x, y, width, distanceType, pointType)
     pointType = pointType or "random"
     local distances = {}
     local loc = {}
     local count = 1
-    local cX = floorDiv(x, size)
-    local cY = floorDiv(y, size)
+    local cX = floorDiv(x, width)
+    local cY = floorDiv(y, width)
     for v = -1, 1, 1 do
         local t = tne(v) + cY
         for u = -1, 1, 1 do
@@ -104,22 +107,22 @@ local function get_closest_point_and_value(x, y, distanceType, pointType)
             local point_x
             local point_y
             if pointType == "random" then
-                point = get_random_point(s, t, size)
-                point_x = point.x * rof + size / 2 * (1 - rof)
-                point_y = point.y * rof + size / 2 * (1 - rof)
+                point = get_random_point(s, t, width)
+                point_x = point.x * rof + width / 2 * (1 - rof)
+                point_y = point.y * rof + width / 2 * (1 - rof)
             elseif pointType == "brick" then
-                point = get_brick_point(s, t, size)
+                point = get_brick_point(s, t, width)
                 point_x = point.x
                 point_y = point.y
             elseif pointType == "hexagon" then
-                point = get_hexagon_point(s, t, size)
+                point = get_hexagon_point(s, t, width)
                 point_x = point.x
                 point_y = point.y
             end
             -- subtracting a small amount to break ties when comparing otherwise equal distances
             -- putting coordinates into "local" coordinates
-            local relativeX = size * (s) + point_x - x - 0.01
-            local relativeY = size * (t) + point_y - y - 0.01
+            local relativeX = width * (s) + point_x - x - 0.01
+            local relativeY = width * (t) + point_y - y - 0.01
             local pDistance = distance(relativeX, relativeY, distanceType)
 
             -- add data for this point to tables
@@ -132,21 +135,20 @@ local function get_closest_point_and_value(x, y, distanceType, pointType)
     local values = {}
     loc[10] = 0.5
     for k, v in pairs(distances) do
-        local factor = noise.clamp((minDistance - v) * size, -1, 0) + 1
+        local factor = noise.clamp((minDistance - v) * width, -1, 0) + 1
         values[k] = factor * loc[k]
     end
     local value = get_extremum("max", values)
     return {distance = minDistance, value = value}
 end
 
-local function get_closest_two_points(x, y, distanceType, pointType)
+local function get_closest_two_points(x, y, width, distanceType, pointType)
     pointType = pointType or "random"
     local distances = {}
     local loc = {}
-    local points = {}
     local count = 1
-    local cX = floorDiv(x, size)
-    local cY = floorDiv(y, size)
+    local cX = floorDiv(x, width)
+    local cY = floorDiv(y, width)
     for v = -1, 1, 1 do
         local t = tne(v) + cY
         for u = -1, 1, 1 do
@@ -155,22 +157,22 @@ local function get_closest_two_points(x, y, distanceType, pointType)
             local point_x
             local point_y
             if pointType == "random" then
-                point = get_random_point(s, t, size)
-                point_x = point.x * rof + size / 2 * (1 - rof)
-                point_y = point.y * rof + size / 2 * (1 - rof)
+                point = get_random_point(s, t, width)
+                point_x = point.x * rof + width / 2 * (1 - rof)
+                point_y = point.y * rof + width / 2 * (1 - rof)
             elseif pointType == "brick" then
-                point = get_brick_point(s, t, size)
+                point = get_brick_point(s, t, width)
                 point_x = point.x
                 point_y = point.y
             elseif pointType == "hexagon" then
-                point = get_hexagon_point(s, t, size)
+                point = get_hexagon_point(s, t, width)
                 point_x = point.x
                 point_y = point.y
             end
             -- subtracting a small amount to break ties when comparing otherwise equal distances
             -- putting coordinates into "local" coordinates
-            local relativeX = size * (s) + point_x - x - 0.01
-            local relativeY = size * (t) + point_y - y - 0.01
+            local relativeX = width * (s) + point_x - x - 0.01
+            local relativeY = width * (t) + point_y - y - 0.01
             local pDistance = distance(relativeX, relativeY, distanceType)
 
             -- add data for this point to tables
@@ -185,7 +187,7 @@ local function get_closest_two_points(x, y, distanceType, pointType)
     for k, v in pairs(distances) do
         -- magic function to get second minimum
         newDistances[k] = (1 / (v - minDistance - 0.0001))
-        local factor = noise.clamp((minDistance - v) * size, -1, 0) + 1
+        local factor = noise.clamp((minDistance - v) * width, -1, 0) + 1
         values[k] = factor * loc[k]
     end
     local secondDistance = 1 / get_extremum("max", newDistances)
@@ -197,7 +199,7 @@ local function get_closest_two_points(x, y, distanceType, pointType)
     }
 end
 
-local function make_ridges(octaves, baseAmplitude, persistence, amplitudeScaling)
+--[[local function make_ridges(octaves, baseAmplitude, persistence, amplitudeScaling)
     local result = 0
     octaves = octaves or 1
     local amplitude = baseAmplitude or 1
@@ -230,12 +232,7 @@ local function make_grid()
                                  defaultSize) *
                          noise.ridge(noise.var("y") * noise.var("segmentation_multiplier"), 0,
                                      defaultSize))
-end
-
-local function is_random_square()
-    local value = modulo(noise.var("moisture") * 157)
-    return functions.lessThan(value, tne(landDensity) / 1000000)
-end
+end]]
 
 return {
     waves = waves,
@@ -244,10 +241,8 @@ return {
     get_closest_point = get_closest_point,
     get_closest_point_and_value = get_closest_point_and_value,
     get_closest_two_points = get_closest_two_points,
-    defaultSize = defaultSize,
-    size = size,
-    small_noise_factor = small_noise_factor,
+    small_noise_factor = small_noise_factor, --[[
     make_ridges = make_ridges,
-    make_grid = make_grid,
+    make_grid = make_grid,]]
     landDensity = landDensity
 }
