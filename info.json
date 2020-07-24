@@ -6,6 +6,11 @@
     "contact": "",
     "homepage": "",
     "factorio_version": "0.18",
-    "dependencies": ["base >= 0.17", "? angelsrefining","? angelsinfiniteores"],
+    "dependencies": [
+        "base >= 0.17",
+        "? angelsrefining",
+        "? angelsinfiniteores",
+        "? angelsindustries"
+    ],
     "description": "Creates a new map preset that generates a world with only lab tiles"
 }

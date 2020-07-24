@@ -23,17 +23,23 @@ for ore, _ in pairs(currentResourceData) do
     fw_property_expressions["entity:" .. ore .. ":richness"] = richName
 end
 
-for _, enemyType in pairs(enemyData) do
-    for name, v in pairs(enemyType) do
-        local probName = "fractured-world-" .. name .. "-probability"
-        data:extend{
-            {
-                type = "noise-expression",
-                name = probName,
-                expression = v.probability_expression
-            }
-        }
-        fw_property_expressions["entity:" .. name .. ":probability"] = probName
+local overhaulBiters = (not mods["angelsrefining"]) or mods["angelsexploration"] or
+                           settings.startup["angels-enable-biters"].value
+if overhaulBiters then
+    for _, enemyType in pairs(enemyData) do
+        for name, v in pairs(enemyType) do
+            if v.probability_expression then
+                local probName = "fractured-world-" .. name .. "-probability"
+                data:extend{
+                    {
+                        type = "noise-expression",
+                        name = probName,
+                        expression = v.probability_expression
+                    }
+                }
+                fw_property_expressions["entity:" .. name .. ":probability"] = probName
+            end
+        end
     end
 end
 
