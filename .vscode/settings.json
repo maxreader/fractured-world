@@ -15,7 +15,8 @@
         "circuit_connector_definitions",
         "mods",
         "log",
-        "serpent"
+        "serpent",
+        "resource_autoplace__patch_metasets"
     ],
     "vscode-lua-format.configPath": "C:/Users/travi/AppData/Roaming/Factorio/mods/fractured-world/.vscode/style.txt",
     "factorio.portal.username": "travis.aelvoet@gmail.com",
