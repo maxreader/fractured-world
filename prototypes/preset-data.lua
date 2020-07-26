@@ -42,5 +42,10 @@ return {
         defaultSize = 64,
         presetDefaults = {frequency = 6},
         cartesian = fnp.is_random_square
+    },
+    ["maze"] = {
+        defaultSize = 64,
+        presetDefaults = {frequency = 6},
+        cartesian = fnp.is_maze_square
     }
 }
