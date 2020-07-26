@@ -49,47 +49,27 @@ local function on_spiral(x, y)
     return modulo(distance(x, y - isYNegative, "chessboard") + specialFactor, 2)
 end
 
-local function is_random_square()
-    local value = modulo(noise.var("moisture") * 157)
-    return functions.lessThan(value, tne(landDensity) / 1000000)
+local function get_coverage_for_random()
+    return noise.var("wlc_elevation_offset") * 0.9 / 20 / noise.log2(6) + 0.55
 end
 
-local function get_closest_point(x, y, width, distanceType, pointType)
-    pointType = pointType or "random"
-    local distances = {}
-    local count = 1
-    local cX = floorDiv(x, width)
-    local cY = floorDiv(y, width)
-    for v = -1, 1, 1 do
-        local t = tne(v) + cY
-        for u = -1, 1, 1 do
-            local s = tne(u) + cX
-            local point
-            local point_x
-            local point_y
-            if pointType == "random" then
-                point = get_random_point(s, t, width)
-                point_x = point.x * rof + width / 2 * (1 - rof)
-                point_y = point.y * rof + width / 2 * (1 - rof)
-            elseif pointType == "brick" then
-                point = get_brick_point(s, t, width)
-                point_x = point.x
-                point_y = point.y
-            elseif pointType == "hexagon" then
-                point = get_hexagon_point(s, t, width)
-                point_x = point.x
-                point_y = point.y
-            end
-            -- shift due to randomness
-            local relativeX = width * (s) + point_x - x
-            local relativeY = width * (t) + point_y - y
-            local pDistance = distance(relativeX, relativeY, distanceType)
-            distances[count] = pDistance
-            count = count + 1
-        end
-    end
-    local minDistance = get_extremum("min", distances)
-    return {distance = minDistance}
+local function is_random_square(x, y)
+    local value = functions.pseudo_random(x, y)
+    value = modulo(value * 13)
+    local probability = get_coverage_for_random()
+    return (greaterThan(value, probability))
+end
+
+local function is_maze_square(x, y)
+
+    local maxNeighbors = floorDiv((1 - rof) * 8)
+    local cellsToBeBorn = floorDiv(small_noise_factor * 8)
+    local neighbors = 0
+    for v = -1, 1 do for u = -1, 1 do neighbors = neighbors + is_random_square(x + v, y + u) end end
+    neighbors = neighbors - is_random_square(x, y)
+    local alive = greaterThan(functions.lessThan(neighbors, maxNeighbors), 0.1)
+    return noise.max(alive, functions.lessThan(noise.absolute_value(neighbors - cellsToBeBorn), 1))
+
 end
 
 local function get_closest_point_and_value(x, y, width, distanceType, pointType)
@@ -187,7 +167,7 @@ local function get_closest_two_points(x, y, width, distanceType, pointType)
     for k, v in pairs(distances) do
         -- magic function to get second minimum
         newDistances[k] = (1 / (v - minDistance - 0.0001))
-        local factor = noise.clamp((minDistance - v) * width, -1, 0) + 1
+        local factor = noise.min((minDistance - v) * math.huge, 0) + 1
         values[k] = factor * loc[k]
     end
     local secondDistance = 1 / get_extremum("max", newDistances)
@@ -238,7 +218,7 @@ return {
     waves = waves,
     on_spiral = on_spiral,
     is_random_square = is_random_square,
-    get_closest_point = get_closest_point,
+    is_maze_square = is_maze_square,
     get_closest_point_and_value = get_closest_point_and_value,
     get_closest_two_points = get_closest_two_points,
     small_noise_factor = small_noise_factor, --[[

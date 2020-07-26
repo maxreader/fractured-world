@@ -1,15 +1,24 @@
 local mgp = data.raw["map-gen-presets"].default
+local noise = require("noise")
 
---[[mgp["fw-debug"] = {
+--[[data:extend{
+    {
+        type = "noise-expression",
+        name = "debug",
+        expression = noise.var("finite_water_level") * 100
+    }
+}
+
+mgp["fw-debug"] = {
     order = "h",
     basic_settings = {
         property_expression_names = {
-            ["entity:iron-ore:richness"] = "ridges",
+            ["entity:iron-ore:richness"] = "debug",
             ["entity:iron-ore:probability"] = 10,
             elevation = 10
         }
     }
-}]]
+} -- ]]
 
 local count = 0
 local function make_preset(name, args)
@@ -21,8 +30,8 @@ local function make_preset(name, args)
     local fw_distance = "fractured-world-point-distance-" .. name
     local moisture = "fractured-world-value-" .. name
     if args.cartesian then
-        moisture = "fractured-world-value-squares"
-        fw_distance = "fractured-world-point-distance-squares"
+        moisture = "fractured-world-cartesian-value"
+        fw_distance = "fractured-world-chessboard-distance"
     end
     local defaultSize = "fw_default_size"
     if args.defaultSize then defaultSize = "fw_default_size_" .. name end
