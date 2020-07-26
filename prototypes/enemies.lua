@@ -4,7 +4,7 @@ local functions = require("prototypes.functions")
 local fnp = require("prototypes.fractured-noise-programs")
 local distance = noise.max(noise.var("distance") - noise.var("starting_area_radius"), 0)
 local frequencySlider = functions.sliderToScale("control-setting:enemy-base:frequency:multiplier")
-local sizeSlider = functions.sliderToScale("control-setting:enemy-base:size:multiplier")
+local sizeSlider = 1 - functions.sliderToScale("control-setting:enemy-base:size:multiplier")
 local radius = noise.var("fw_distance")
 local scaledRadius = (1 - radius / functions.size)
 
