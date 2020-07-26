@@ -6,6 +6,7 @@ local functions = require('prototypes.functions')
 local get_closest_point_and_value = fnp.get_closest_point_and_value
 local get_closest_two_points = fnp.get_closest_two_points
 local small_noise_factor = fnp.small_noise_factor
+local size = functions.size
 
 local floorDiv = functions.floorDiv
 local modulo = functions.modulo
@@ -26,7 +27,6 @@ local function make_voronoi_preset(name, args)
     local waterInfluence = params.waterInfluence or 6
     local waterOffset = params.waterOffset or 100
     local aspectRatio = params.aspectRatio or 1
-    local width = functions.size
     local elevation
     local value
     local pointDistance
@@ -37,7 +37,7 @@ local function make_voronoi_preset(name, args)
     local waterSlider = noise.var("wlc_elevation_offset")
 
     if class == "one-point" then
-        local point = get_closest_point_and_value(x, y, width, distanceType, pointType)
+        local point = get_closest_point_and_value(x, y, size, distanceType, pointType)
         elevation = (waterSlider * waterInfluence - 2 * point.distance * scale +
                         noise.var("fw_default_size") / 2 + noise.var("small-noise") / 15 *
                         small_noise_factor + waterOffset)
@@ -78,7 +78,6 @@ local function make_voronoi_preset(name, args)
 end
 
 local function make_cartesian_preset(name, args)
-    local size = functions.size
     local generating_function = args.cartesian
     data:extend{
         {
@@ -135,6 +134,22 @@ data:extend{
         name = "fractured-world-aux",
         order = "4000",
         expression = modulo(noise.var("moisture") * 631)
+    }, {
+        type = "noise-expression",
+        name = "fractured-world-cartesian-value",
+        intended_property = "moisture",
+        expression = noise.define_noise_function(function(x, y, tile, map)
+            return functions.get_random_point(floorDiv(x, size), floorDiv(y, size), functions.size)
+                       .val
+        end)
+    }, {
+        type = "noise-expression",
+        name = "fractured-world-chessboard-distance",
+        intended_property = "fw_elevation",
+        expression = noise.define_noise_function(function(x, y, tile, map)
+            return functions.distance(modulo(x, size) - size / 2, modulo(y, size) - size / 2,
+                                      "chessboard")
+        end)
     }, {
         type = "noise-expression",
         name = "small-noise",
