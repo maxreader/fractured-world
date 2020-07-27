@@ -3,6 +3,8 @@ local ores = require("prototypes.ores")
 local get_probability = ores.get_probability
 local get_richness = ores.get_richness
 local currentResourceData = ores.currentResourceData
+local get_infinite_probability = ores.get_infinite_probability
+local infiniteOreData = ores.infiniteOreData
 
 local fw_property_expressions = {}
 for ore, _ in pairs(currentResourceData) do
@@ -17,6 +19,24 @@ for ore, _ in pairs(currentResourceData) do
             type = "noise-expression",
             name = richName,
             expression = get_richness(ore)
+        }
+    }
+    fw_property_expressions["entity:" .. ore .. ":probability"] = probName
+    fw_property_expressions["entity:" .. ore .. ":richness"] = richName
+end
+
+for ore, _ in pairs(infiniteOreData) do
+    local probName = "fractured-world-" .. ore .. "-probability"
+    local richName = "fractured-world-" .. ore .. "-richness"
+    data:extend{
+        {
+            type = "noise-expression",
+            name = probName,
+            expression = get_infinite_probability(ore)
+        }, {
+            type = "noise-expression",
+            name = richName,
+            expression = get_richness(infiniteOreData[ore].parentOreName)
         }
     }
     fw_property_expressions["entity:" .. ore .. ":probability"] = probName

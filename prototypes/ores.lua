@@ -1,5 +1,10 @@
 local noise = require("noise")
 local tne = noise.to_noise_expression
+local functions = require("functions")
+local fnp = require("fractured-noise-programs")
+local radius = noise.var("fw_distance")
+local scaledRadius = (radius / functions.size)
+
 local resources = data.raw['resource']
 local rawResourceData = require("prototypes.raw-resource-data")
 local currentResourceData = {}
@@ -20,6 +25,26 @@ for ore, index in pairs(regular_patches) do
         currentResourceData[ore] = {density = 4}
     end
 end
+
+-- TODO: add mod setting for infinite ores being "normal" ores or on their main patch
+--[[
+    1. See if ore has infinite in the name, and is infinite
+    2. Check if there's another ore with the same name minus the infinite bit
+    3. If so, wipe out the infinite ore from the list, tag it in the parent resource
+]]
+local infiniteOreData = {}
+for ore, oreData in pairs(currentResourceData) do
+    if resources[ore].infinite and string.find(ore, "^infinite%-") then
+        local parentOreName = string.sub(ore, 10)
+        if resources[parentOreName] then
+            infiniteOreData[ore] = {
+                parentOreName = parentOreName
+            }
+            currentResourceData[parentOreName].has_infinite_version = true
+        end
+    end
+end
+
 --[[
 default settings: approx 64 islands/km2
 we want at most 1/16 of the islands to have ore by default
@@ -53,7 +78,25 @@ for ore, oreData in pairs(currentResourceData) do
     oreData.endLevel = tne(oreData.endLevel) / (oreCountMultiplier) * overallFrequency
 end
 
+-- TODO: copy parent ore data wholesale and recalculate probability with own sliders
 local aux = 1 - noise.var("fractured-world-aux")
+local function get_infinite_probability(ore)
+    local parentOreName = infiniteOreData[ore].parentOreName
+    local parentOreData = currentResourceData[parentOreName]
+    local parentProbability = data.raw["noise-expression"]["fractured-world-" .. parentOreName ..
+                                  "-probability"].expression
+
+    local minRadius = 1 / 16
+    local maxRadius = 1 / 8
+    local get_radius = functions.make_interpolation(parentOreData.startLevel, minRadius,
+                                                    parentOreData.endLevel, maxRadius)
+
+    local thisRadius = get_radius(aux)
+    local withinRadius = functions.less_than(scaledRadius, thisRadius)
+    local moistureFactor = functions.less_than(noise.var("moisture"), tne(0.5))
+    return 2 * parentProbability * moistureFactor * withinRadius
+end
+
 local function get_probability(ore)
     local oreData = currentResourceData[ore]
     local randProb = oreData.randProb or 1
@@ -75,28 +118,33 @@ local function get_probability(ore)
     return probability_expression
 end
 
-local landDensity = require("fractured-noise-programs").landDensity
 local function get_richness(ore)
     -- Get params for calculations
     local oreData = currentResourceData[ore]
-    local density = oreData.density or 8
     local addRich = oreData.addRich or 0
     local postMult = oreData.postMult or 1
     local minimumRichness = oreData.minRich or 0
-    local randProb = oreData.randProb or 1
-    randProb = noise.max(1, randProb)
     local settings = noise.get_control_setting(ore)
 
-    local thisVariance = (aux - oreData.startLevel) / (oreData.endLevel - oreData.startLevel) *
-                             oreData.variance + (oreData.randmin)
-    return noise.max(
-               ((770 * noise.var("distance") + 1000000) * density * settings.size_multiplier *
-                   settings.richness_multiplier * oreCountMultiplier * thisVariance / randProb /
-                   landDensity + addRich) * postMult, minimumRichness)
+    local variance = (aux - oreData.startLevel) / (oreData.endLevel - oreData.startLevel) *
+                         oreData.variance + (oreData.randmin)
+    local factors = {
+        oreData.density or 8,
+        770 * noise.var("distance") + 1000000,
+        settings.richness_multiplier,
+        settings.size_multiplier,
+        1 / noise.max(oreData.randProb or 1, 1),
+        oreCountMultiplier, variance,
+        1 / tne(fnp.landDensity)
+    }
+    return noise.max((functions.multiply_probabilities(factors) + addRich) * postMult,
+                     minimumRichness)
 end
 
 return {
     get_probability = get_probability,
     get_richness = get_richness,
-    currentResourceData = currentResourceData
+    currentResourceData = currentResourceData,
+    get_infinite_probability = get_infinite_probability,
+    infiniteOreData = infiniteOreData
 }
