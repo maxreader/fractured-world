@@ -3,21 +3,21 @@ local tne = noise.to_noise_expression
 local functions = require("prototypes.functions")
 local floorDiv = functions.floorDiv
 local modulo = functions.modulo
-local greaterThan = functions.greaterThan
-local equalTo = functions.equalTo
+local greater_than = functions.greater_than
+local equal_to = functions.equal_to
 local rof = functions.rof
 local get_random_point = functions.get_random_point
 local distance = functions.distance
 local get_extremum = functions.get_extremum
 local small_noise_factor = noise.get_control_setting("island-randomness").size_multiplier
-local ssnf = functions.sliderToScale("control-setting:island-randomness:size:multiplier")
+local ssnf = functions.slider_to_scale("control-setting:island-randomness:size:multiplier")
 local waterLevel = -(noise.var("wlc_elevation_offset"))
 local landDensity = noise.delimit_procedure(145 * waterLevel ^ 2 - 10660 * waterLevel + 212200)
 
 local function waves(x, y)
     x = modulo(x, 4) * (1 - ssnf) + modulo(y, 4) * ssnf
     y = modulo(y, 4) * (1 - ssnf) + modulo(x, 4) * ssnf
-    return 1 - noise.clamp(greaterThan(y, 0) - modulo(x, 2) * (1 - equalTo(y, x)), 0, 1)
+    return 1 - noise.clamp(greater_than(y, 0) - modulo(x, 2) * (1 - equal_to(y, x)), 0, 1)
 end
 
 local function get_brick_point(x, y, width)
@@ -57,7 +57,7 @@ local function is_random_square(x, y)
     local value = functions.pseudo_random(x, y)
     value = modulo(value * 13)
     local probability = get_coverage_for_random()
-    return (greaterThan(value, probability))
+    return (greater_than(value, probability))
 end
 
 local function is_maze_square(x, y)
@@ -67,8 +67,8 @@ local function is_maze_square(x, y)
     local neighbors = 0
     for v = -1, 1 do for u = -1, 1 do neighbors = neighbors + is_random_square(x + v, y + u) end end
     neighbors = neighbors - is_random_square(x, y)
-    local alive = greaterThan(functions.lessThan(neighbors, maxNeighbors), 0.1)
-    return noise.max(alive, functions.lessThan(noise.absolute_value(neighbors - cellsToBeBorn), 1))
+    local alive = greater_than(functions.less_than(neighbors, maxNeighbors), 0.1)
+    return noise.max(alive, functions.less_than(noise.absolute_value(neighbors - cellsToBeBorn), 1))
 
 end
 

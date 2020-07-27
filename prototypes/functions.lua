@@ -2,7 +2,7 @@ local noise = require("noise")
 local tne = noise.to_noise_expression
 local pi = tne(math.pi)
 
-local function sliderToScale(autoplaceControlName, range)
+local function slider_to_scale(autoplaceControlName, range)
     range = range or 6
     return (1 - noise.log2(noise.var(autoplaceControlName)) / (noise.log2(range, 2))) / 2
 end
@@ -43,10 +43,11 @@ local function bitwiseXOR(x1, x2)
     end
     return result
 end
-
-local function greaterThan(a, b) return noise.clamp((a - b) * math.huge, 0, 1) end
-local function lessThan(a, b) return noise.clamp((b - a) * math.huge, 0, 1) end
-local function equalTo(a, b) return 1 - greaterThan(a, b) - lessThan(a, b) end
+---Is a > b?
+local function greater_than(a, b) return noise.clamp((a - b) * math.huge, 0, 1) end
+---Is a < b?
+local function less_than(a, b) return noise.clamp((b - a) * math.huge, 0, 1) end
+local function equal_to(a, b) return 1 - greater_than(a, b) - less_than(a, b) end
 
 local function reduce(reducer, list)
     local result = list[1]
@@ -69,28 +70,45 @@ local function scale_table(values, scalar)
     return returnTable
 end
 
+---Multiply together the elements of a table
+---@param probabilities table
+---@return number
 local function multiply_probabilities(probabilities)
     return reduce(function(a, b) return a * b end, probabilities)
 end
 
+---Make a function to interpolate between two points
+---@param x0 number
 local function make_interpolation(x0, y0, x1, y1)
-    if not (x0 and y0) then error("Error: function make_interpolation() given invalid input") end
+    if not (x0 and y0) then
+        error("Error: function make_interpolation() needs at least one point")
+    end
     x1 = x1 or 0
     y1 = y1 or 0
     return function(x) return (x - x0) / (x1 - x0) * (y0 - y1) + y1 end
 end
 
----@param type string: "euclidean" "rectilinear" "chessboard"
-local function distance(x, y, type)
-    type = type or "euclidean"
+---Get the distance to a point
+---@param x number
+---@param y number
+---@param metric string|nil "euclidean, rectilinear
+---@return number distance
+local function distance(x, y, metric)
+    metric = metric or "euclidean"
     x = noise.absolute_value(x) or 0
     y = noise.absolute_value(y) or 0
-    if type == "euclidean" then return (x ^ 2 + y ^ 2) ^ 0.5 end
-    if type == "rectilinear" then return x + y end
-    if type == "chessboard" then return noise.max(x, y) end
+    if metric == "euclidean" then
+        return (x ^ 2 + y ^ 2) ^ 0.5
+    elseif metric == "rectilinear" then
+        return x + y
+    elseif metric == "chessboard" then
+        return noise.max(x, y)
+    else
+        return error("metric: " .. metric .. ", is not a valid distance metric")
+    end
 end
 
-local function smoothStep(val, edge0, edge1)
+local function smooth_step(val, edge0, edge1)
     local t = noise.clamp((val - edge0) / (edge1 - edge0), 0.0, 1.0);
     return t * t * (3.0 - 2.0 * t);
 end
@@ -102,44 +120,60 @@ local function pseudo_sin(val)
     return ( --[[-0.417698 * val ^ 2 + ]] 1.312236 * val - 0.050465) * factor
 end
 
+---Get a random point for a given coordinate pair.
+---@param x number
+---@param y number
+---@return number
 local function pseudo_random(x, y)
-    x = (97 * x) or 1
-    y = (43 * y) or 1
+    x = ( --[[97 * --]] x) or 1
+    y = ( --[[43 * --]] y) or 1
     local x0 = noise.var("map_seed") / 2 ^ 32
     local y0 = tne(0.234561)
     local angle = (x * x0 + y * y0)
-    return modulo(pseudo_sin(angle * 5000))
+    return modulo(pseudo_sin(angle * 49300))
 end
 
----@param width integer
+--- Get a random point within a cell.
+---@param x integer x coordinate of seed/cell
+---@param y integer y coordinate of seed/cell
+---@param width integer|nil size of square cell
+---@return integer x
+---@return integer y
+---@return number value
 local function get_random_point(x, y, width)
     width = width or 1
     local value = pseudo_random(x, y)
-    -- value = value * random_offset_factor + 0.5 * (1 - random_offset_factor)
     local scaledValue = value * width * width
     local newX = modulo(scaledValue, width)
     local newY = floorDiv(scaledValue, width)
     return {x = newX, y = newY, val = value}
 end
 
-local random_offset_factor = sliderToScale("control-setting:island-randomness:frequency:multiplier")
+-- For a given coordinate, used to seed a random value generator,
+-- this will return two coordinates of a new point within the bounds
+-- of a square defined by width
+-- It also returns the random value, so that the random value generator
+-- does not need to be called multiple times
+
+local random_offset_factor = slider_to_scale(
+                                 "control-setting:island-randomness:frequency:multiplier")
 local size = noise.var("fw_default_size") / noise.var("segmentation_multiplier")
 return {
-    sliderToScale = sliderToScale,
+    slider_to_scale = slider_to_scale,
     floorDiv = floorDiv,
     modulo = modulo,
     bitwiseAND = bitwiseAND,
     bitwiseXOR = bitwiseXOR,
-    greaterThan = greaterThan,
-    lessThan = lessThan,
-    equalTo = equalTo,
+    greater_than = greater_than,
+    less_than = less_than,
+    equal_to = equal_to,
     reduce = reduce,
     get_extremum = get_extremum,
     scale_table = scale_table,
     multiply_probabilities = multiply_probabilities,
     make_interpolation = make_interpolation,
     distance = distance,
-    smoothStep = smoothStep,
+    smooth_step = smooth_step,
     pseudo_random = pseudo_random,
     get_random_point = get_random_point,
     rof = random_offset_factor,

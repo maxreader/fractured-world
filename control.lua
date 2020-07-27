@@ -7,4 +7,4 @@
     surface.force_generate_chunk_requests()
     thisProfiler.stop()
     game.print(thisProfiler)
-end)]] 
+end) -- ]] 

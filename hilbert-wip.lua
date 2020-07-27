@@ -6,7 +6,7 @@ local function on_hilbert(x, y)
     y = noise.ridge(y, 0, 4)
     -- x = modulo(x, 4)
     -- y = modulo(y, 4)
-    return noise.clamp(greaterThan(y, 0) - modulo(x, 2) * (1 - equalTo(y, x)), 0, 1)
+    return noise.clamp(greater_than(y, 0) - modulo(x, 2) * (1 - equal_to(y, x)), 0, 1)
 end
 
 local function my_hilbert(x, y, n)

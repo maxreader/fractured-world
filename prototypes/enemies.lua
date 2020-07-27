@@ -3,8 +3,8 @@ local tne = noise.to_noise_expression
 local functions = require("prototypes.functions")
 local fnp = require("prototypes.fractured-noise-programs")
 local distance = noise.max(noise.var("distance") - noise.var("starting_area_radius"), 0)
-local frequencySlider = functions.sliderToScale("control-setting:enemy-base:frequency:multiplier")
-local sizeSlider = 1 - functions.sliderToScale("control-setting:enemy-base:size:multiplier")
+local frequencySlider = functions.slider_to_scale("control-setting:enemy-base:frequency:multiplier")
+local sizeSlider = 1 - functions.slider_to_scale("control-setting:enemy-base:size:multiplier")
 local radius = noise.var("fw_distance")
 local scaledRadius = (1 - radius / functions.size)
 
@@ -41,9 +41,9 @@ end
 
 -- get islands that should have biters
 local moisture = noise.var("moisture")
-local islandsWithBiters = noise.delimit_procedure(functions.lessThan(moisture, thisFrequency))
-local spawnerCircle = noise.delimit_procedure(functions.lessThan(thisSize, scaledRadius / 1.45))
-local wormCircle = noise.delimit_procedure(functions.lessThan(thisSize, scaledRadius / 1.3))
+local islandsWithBiters = noise.delimit_procedure(functions.less_than(moisture, thisFrequency))
+local spawnerCircle = noise.delimit_procedure(functions.less_than(thisSize, scaledRadius / 1.45))
+local wormCircle = noise.delimit_procedure(functions.less_than(thisSize, scaledRadius / 1.3))
 
 local count = 0
 local function make_enemy_autoplace(type, prototypeData, penalty_multiplier)
@@ -65,7 +65,7 @@ local function make_enemy_autoplace(type, prototypeData, penalty_multiplier)
         if prototypeData[name] and autoplace and (autoplace.force == "enemy") then
             local distance_factor = (prototypeData[name] and prototypeData[name].distance_factor) or
                                         0
-            local placeAtThisDistance = functions.greaterThan(distance, distance_factor * 256)
+            local placeAtThisDistance = functions.greater_than(distance, distance_factor * 256)
             local penalty = tne {
                 type = "function-application",
                 function_name = "random-penalty",
