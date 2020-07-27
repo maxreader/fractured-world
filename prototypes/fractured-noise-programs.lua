@@ -13,6 +13,7 @@ local small_noise_factor = noise.get_control_setting("island-randomness").size_m
 local ssnf = functions.slider_to_scale("control-setting:island-randomness:size:multiplier")
 local waterLevel = -(noise.var("wlc_elevation_offset"))
 local landDensity = noise.delimit_procedure(145 * waterLevel ^ 2 - 10660 * waterLevel + 212200)
+-- TODO: Create functions to make starting areas
 
 local function waves(x, y)
     x = modulo(x, 4) * (1 - ssnf) + modulo(y, 4) * ssnf

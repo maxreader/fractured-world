@@ -20,6 +20,7 @@ end
 local starting_patches = resource_autoplace__patch_metasets.starting.patch_set_indexes
 local regular_patches = resource_autoplace__patch_metasets.regular.patch_set_indexes
 
+-- pick up any ores not in the raw dataset and give them a default
 for ore, index in pairs(regular_patches) do
     if resources[ore] and not currentResourceData[ore] then
         currentResourceData[ore] = {density = 4}
@@ -27,10 +28,12 @@ for ore, index in pairs(regular_patches) do
 end
 
 -- TODO: add mod setting for infinite ores being "normal" ores or on their main patch
+
 --[[
     1. See if ore has infinite in the name, and is infinite
     2. Check if there's another ore with the same name minus the infinite bit
     3. If so, wipe out the infinite ore from the list, tag it in the parent resource
+    4. Check if the ore is in the starting area, if so, add a flag
 ]]
 local infiniteOreData = {}
 for ore, oreData in pairs(currentResourceData) do
@@ -43,6 +46,7 @@ for ore, oreData in pairs(currentResourceData) do
             currentResourceData[parentOreName].has_infinite_version = true
         end
     end
+    if starting_patches[ore] then currentResourceData[ore].starting_patch = true end
 end
 
 --[[
@@ -79,6 +83,7 @@ for ore, oreData in pairs(currentResourceData) do
 end
 
 -- TODO: copy parent ore data wholesale and recalculate probability with own sliders
+-- TODO: apply small noise to infinite ores
 local aux = 1 - noise.var("fractured-world-aux")
 local function get_infinite_probability(ore)
     local parentOreName = infiniteOreData[ore].parentOreName
