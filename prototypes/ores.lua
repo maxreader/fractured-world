@@ -2,8 +2,6 @@ local noise = require("noise")
 local tne = noise.to_noise_expression
 local functions = require("functions")
 local fnp = require("fractured-noise-programs")
-local radius = noise.var("fw_distance")
-local scaledRadius = (radius / functions.size)
 
 local resources = data.raw['resource']
 local rawResourceData = require("prototypes.raw-resource-data")
@@ -43,6 +41,7 @@ for ore, oreData in pairs(currentResourceData) do
             infiniteOreData[ore] = {
                 parentOreName = parentOreName
             }
+            currentResourceData[ore] = nil
             currentResourceData[parentOreName].has_infinite_version = true
         end
     end
@@ -82,8 +81,8 @@ for ore, oreData in pairs(currentResourceData) do
     oreData.endLevel = tne(oreData.endLevel) / (oreCountMultiplier) * overallFrequency
 end
 
--- TODO: copy parent ore data wholesale and recalculate probability with own sliders
--- TODO: apply small noise to infinite ores
+local radius = noise.var("fw_distance")
+local scaledRadius = (radius / functions.size)
 local aux = 1 - noise.var("fractured-world-aux")
 local function get_infinite_probability(ore)
     local parentOreName = infiniteOreData[ore].parentOreName
@@ -91,15 +90,53 @@ local function get_infinite_probability(ore)
     local parentProbability = data.raw["noise-expression"]["fractured-world-" .. parentOreName ..
                                   "-probability"].expression
 
-    local minRadius = 1 / 16
-    local maxRadius = 1 / 8
+    local minRadius = 1 / 8
+    local maxRadius = 1 / 4
     local get_radius = functions.make_interpolation(parentOreData.startLevel, minRadius,
                                                     parentOreData.endLevel, maxRadius)
 
     local thisRadius = get_radius(aux)
-    local withinRadius = functions.less_than(scaledRadius, thisRadius)
-    local moistureFactor = functions.less_than(noise.var("moisture"), tne(0.5))
-    return 2 * parentProbability * moistureFactor * withinRadius
+    data:extend{
+        {
+            type = "noise-expression",
+            name = "fractured-world-" .. ore .. "radial-multiplier",
+            expression = noise.max(thisRadius - scaledRadius, 0)
+        }
+    }
+    local moistureFactor = noise.max(functions.less_than(noise.var("moisture"), tne(0.5)),
+                                     noise.var("fractured-world-biter-islands"))
+    local sizeMultiplier = noise.get_control_setting(ore).size_multiplier
+    local randomness = noise.clamp(noise.var("small-noise"), 1, 10)
+    local probabilities = {
+        tne(10), parentProbability, moistureFactor,
+        noise.var("fractured-world-" .. ore .. "radial-multiplier"),
+        sizeMultiplier, randomness
+    }
+    return functions.multiply_probabilities(probabilities)
+end
+
+local function get_infinite_richness(ore)
+
+    local oreData = currentResourceData[infiniteOreData[ore].parentOreName]
+    local addRich = oreData.addRich or 0
+    local postMult = oreData.postMult or 1
+    local minimumRichness = oreData.minRich or 0
+    local settings = noise.get_control_setting(ore)
+    local variance = (aux - oreData.startLevel) / (oreData.endLevel - oreData.startLevel) *
+                         oreData.variance + (oreData.randmin)
+
+    local factors = {
+        oreData.density or 8,
+        770 * noise.var("distance") + 1000000,
+        settings.richness_multiplier,
+        1 / noise.max(oreData.randProb or 1, 1),
+        oreCountMultiplier, variance,
+        1 / tne(fnp.landDensity),
+        noise.max(noise.var("fractured-world-" .. ore .. "radial-multiplier"), 1),
+        tne(10)
+    }
+    return noise.max((functions.multiply_probabilities(factors) + addRich) * postMult,
+                     minimumRichness)
 end
 
 local function get_probability(ore)
@@ -151,5 +188,6 @@ return {
     get_richness = get_richness,
     currentResourceData = currentResourceData,
     get_infinite_probability = get_infinite_probability,
+    get_infinite_richness = get_infinite_richness,
     infiniteOreData = infiniteOreData
 }
