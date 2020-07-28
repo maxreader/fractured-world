@@ -34,8 +34,11 @@ end
     4. Check if the ore is in the starting area, if so, add a flag
 ]]
 local infiniteOreData = {}
+local doInfiniteOres = settings.startup["fractured-world-enable-infinite-parenting"].value
 for ore, oreData in pairs(currentResourceData) do
-    if resources[ore].infinite and string.find(ore, "^infinite%-") then
+    local isInfinite = doInfiniteOres and resources[ore].infinite and
+                           string.find(ore, "^infinite%-") and true or false
+    if isInfinite then
         local parentOreName = string.sub(ore, 10)
         if resources[parentOreName] then
             infiniteOreData[ore] = {
@@ -47,7 +50,6 @@ for ore, oreData in pairs(currentResourceData) do
     end
     if starting_patches[ore] then currentResourceData[ore].starting_patch = true end
 end
-
 --[[
 default settings: approx 64 islands/km2
 we want at most 1/16 of the islands to have ore by default
