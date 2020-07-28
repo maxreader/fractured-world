@@ -8,6 +8,23 @@ local sizeSlider = 1 - functions.slider_to_scale("control-setting:enemy-base:siz
 local radius = noise.var("fw_distance")
 local scaledRadius = (1 - radius / functions.size)
 
+--[[
+    Defaults:
+    chunks distance for maximum intensity
+    starting hole radius
+
+    minimum near frequency - 0.001
+    maximum near frequency - 0.1
+    minimum far frequency - 0.01
+    maximum far frequency - 1
+
+    minimum near size - 0.01
+    maximum near size - 0.3
+    minimum far size - 0.5
+    maximum far size - 1
+
+]]
+
 local thisIntensity = noise.min(distance / (32 * 100), 1) -- based on vanilla values
 local thisSize
 local thisFrequency

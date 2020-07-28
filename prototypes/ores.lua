@@ -7,6 +7,25 @@ local resources = data.raw['resource']
 local rawResourceData = require("prototypes.raw-resource-data")
 local currentResourceData = {}
 
+--[[
+    Default values to be made into startup settings:
+    default density - 8
+    default frequency - 2.5
+    randmin - 0.25
+    randmax - 2
+    cells per basis area - 64
+    max patches per basis area - 4
+    default additional richness - 0
+    distance multiplier - 770
+    base richness - 1000000
+    randProb - 1
+    addRich - 0
+    postMult - 1
+    minRich = 0
+    infinite ore min radius - 1/8
+    infinite ore max radius - 1/2
+]]
+
 for k, v in pairs(rawResourceData) do
     if mods[k] then
         for ore, oreData in pairs(v) do
@@ -21,7 +40,7 @@ local regular_patches = resource_autoplace__patch_metasets.regular.patch_set_ind
 -- pick up any ores not in the raw dataset and give them a default
 for ore, index in pairs(regular_patches) do
     if resources[ore] and not currentResourceData[ore] then
-        currentResourceData[ore] = {density = 4}
+        currentResourceData[ore] = {density = 8}
     end
 end
 
@@ -73,8 +92,8 @@ for ore, oreData in pairs(currentResourceData) do
     oreData.randmin = randmin
 end
 
-local maxPatchesPerKm2 = 4
-local overallFrequency = maxPatchesPerKm2 / 64
+local overallFrequency = settings.startup["fractured-world-overall-resource-frequency"].value
+local maxPatchesPerKm2 = overallFrequency * 64
 local oreCountMultiplier = noise.delimit_procedure(noise.max(1, oreCount / maxPatchesPerKm2))
 
 -- scale startLevel and endLevel so that the desired overall frequency of islands have ore
@@ -93,7 +112,7 @@ local function get_infinite_probability(ore)
                                   "-probability"].expression
 
     local minRadius = 1 / 8
-    local maxRadius = 1 / 4
+    local maxRadius = 1 / 2
     local get_radius = functions.make_interpolation(parentOreData.startLevel, minRadius,
                                                     parentOreData.endLevel, maxRadius)
 
@@ -105,6 +124,7 @@ local function get_infinite_probability(ore)
             expression = noise.max(thisRadius - scaledRadius, 0)
         }
     }
+    -- if the island is dry, *or* if it has biters on it, place the infinite ore
     local moistureFactor = noise.max(functions.less_than(noise.var("moisture"), tne(0.5)),
                                      noise.var("fractured-world-biter-islands"))
     local sizeMultiplier = noise.get_control_setting(ore).size_multiplier
@@ -128,7 +148,7 @@ local function get_infinite_richness(ore)
                          oreData.variance + (oreData.randmin)
 
     local factors = {
-        oreData.density or 8,
+        oreData.density,
         770 * noise.var("distance") + 1000000,
         settings.richness_multiplier,
         1 / noise.max(oreData.randProb or 1, 1),
