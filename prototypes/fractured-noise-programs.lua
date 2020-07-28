@@ -13,7 +13,7 @@ local small_noise_factor = noise.get_control_setting("island-randomness").size_m
 local ssnf = functions.slider_to_scale("control-setting:island-randomness:size:multiplier")
 local waterLevel = -(noise.var("wlc_elevation_offset"))
 local landDensity = noise.delimit_procedure(145 * waterLevel ^ 2 - 10660 * waterLevel + 212200)
--- TODO: Create functions to make starting areas
+-- TODO: Create functions to make starting areas. First, make single island map type, then transition between the two
 
 local function waves(x, y)
     x = modulo(x, 4) * (1 - ssnf) + modulo(y, 4) * ssnf
@@ -168,7 +168,7 @@ local function get_closest_two_points(x, y, width, distanceType, pointType)
     for k, v in pairs(distances) do
         -- magic function to get second minimum
         newDistances[k] = (1 / (v - minDistance - 0.0001))
-        local factor = noise.min((minDistance - v) * math.huge, 0) + 1
+        local factor = noise.clamp((minDistance - v) * width, -1, 0) + 1
         values[k] = factor * loc[k]
     end
     local secondDistance = 1 / get_extremum("max", newDistances)
@@ -179,7 +179,9 @@ local function get_closest_two_points(x, y, width, distanceType, pointType)
         value = value
     }
 end
-
+-- TODO:create noise program to return closest two distances and angles
+-- TODO:create noise program to return border points
+-- TODO:create noise program to return bridge points
 --[[local function make_ridges(octaves, baseAmplitude, persistence, amplitudeScaling)
     local result = 0
     octaves = octaves or 1
