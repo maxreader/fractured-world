@@ -44,7 +44,7 @@ local function make_voronoi_preset(name, args)
         value = point.value
         pointDistance = point.distance
     elseif class == "two-point" then
-        local points = get_closest_two_points(x, y, functions.size, distanceType, pointType)
+        local points = get_closest_two_points(x, y, size, distanceType, pointType)
         local d1 = points.distance
         local d2 = points.secondDistance
         elevation = (waterInfluence * waterSlider - (d1 - d2) * scale) -
