@@ -54,6 +54,7 @@ end
 ]]
 local infiniteOreData = {}
 local doInfiniteOres = settings.startup["fractured-world-enable-infinite-parenting"].value
+local startingOreCount = 0
 for ore, oreData in pairs(currentResourceData) do
     local isInfinite = doInfiniteOres and resources[ore].infinite and
                            string.find(ore, "^infinite%-") and true or false
@@ -67,8 +68,12 @@ for ore, oreData in pairs(currentResourceData) do
             currentResourceData[parentOreName].has_infinite_version = true
         end
     end
-    if starting_patches[ore] then currentResourceData[ore].starting_patch = true end
+    if starting_patches[ore] then
+        currentResourceData[ore].starting_patch = true
+        startingOreCount = startingOreCount + 1
+    end
 end
+
 --[[
 default settings: approx 64 islands/km2
 we want at most 1/16 of the islands to have ore by default

@@ -64,12 +64,12 @@ end
 local function is_maze_square(x, y)
 
     local maxNeighbors = floorDiv((1 - rof) * 8)
-    local cellsToBeBorn = floorDiv(small_noise_factor * 8)
+    local cellsToBeBorn = floorDiv(ssnf * 8)
     local neighbors = 0
     for v = -1, 1 do for u = -1, 1 do neighbors = neighbors + is_random_square(x + v, y + u) end end
     neighbors = neighbors - is_random_square(x, y)
-    local alive = greater_than(functions.less_than(neighbors, maxNeighbors), 0.1)
-    return noise.max(alive, functions.less_than(noise.absolute_value(neighbors - cellsToBeBorn), 1))
+    local alive = functions.less_than(neighbors, maxNeighbors)
+    return noise.max(alive, functions.equal_to(cellsToBeBorn, neighbors))
 
 end
 
@@ -188,9 +188,8 @@ local function create_elevation(waterInfluence,
                                 effectiveDistance,
                                 scale,
                                 waterOffset)
-    return
-        (waterInfluence * waterSlider - effectiveDistance * scale) - noise.var("fw_default_size") /
-            2 + waterOffset + noise.var("small-noise") / 15 * small_noise_factor
+    return (waterInfluence * waterSlider - effectiveDistance * scale) + waterOffset +
+               noise.var("small-noise") / 15 * small_noise_factor
 end
 
 local function create_starting_elevation(elevation, scaledDistance)

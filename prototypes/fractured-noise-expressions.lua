@@ -48,14 +48,16 @@ local function make_voronoi_preset(name, args)
     if class == "one-point" then
         local point = get_closest_point_and_value(x, y, size, distanceType, pointType)
         elevation = fnp.create_elevation(waterInfluence, waterSlider, 2 * point.distance, scale,
-                                         waterOffset)
+                                         waterOffset) + noise.var("fw_default_size") /
+            2
         value = point.value
         pointDistance = point.distance
     elseif class == "two-point" then
         local points = get_closest_two_points(x, y, size, distanceType, pointType)
         local d1 = points.distance
         local d2 = points.secondDistance
-        elevation = fnp.create_elevation(waterInfluence, waterSlider, (d1 - d2), scale, waterOffset)
+        elevation = fnp.create_elevation(waterInfluence, waterSlider, (d1 - d2), scale, waterOffset)  - noise.var("fw_default_size") /
+            2
         pointDistance = points.distance
         value = points.value
     end
