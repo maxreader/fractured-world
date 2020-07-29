@@ -12,6 +12,11 @@ local floorDiv = functions.floorDiv
 local modulo = functions.modulo
 local distance = functions.distance
 
+--[[
+    Defaults to add as settings
+    Default Size - 256
+]]
+
 local temperatureRange = 60
 local temperatureFloor = -25
 if mods["alien-biomes"] then
@@ -32,8 +37,8 @@ local function make_voronoi_preset(name, args)
     local pointDistance
 
     local scale = noise.var("segmentation_multiplier")
-    local x = noise.var("x")
-    local y = noise.var("y") * aspectRatio
+    local x = noise.var("x") + size / 2
+    local y = (noise.var("y") + size / 2) * aspectRatio
     local waterSlider = noise.var("wlc_elevation_offset")
 
     if class == "one-point" then
@@ -87,6 +92,8 @@ local function make_cartesian_preset(name, args)
             order = "4000",
             expression = noise.define_noise_function(
                 function(x, y, tile, map)
+                    x = x + size / 2
+                    y = y + size / 2
                     local cellX = floorDiv(x, size)
                     local cellY = floorDiv(y, size)
                     local localX = noise.absolute_value(modulo(x, size) - size / 2) - 1
@@ -139,14 +146,18 @@ data:extend{
         name = "fractured-world-cartesian-value",
         intended_property = "moisture",
         expression = noise.define_noise_function(function(x, y, tile, map)
+            x = x + size / 2
+            y = y + size / 2
             return functions.get_random_point(floorDiv(x, size), floorDiv(y, size), functions.size)
                        .val
         end)
     }, {
         type = "noise-expression",
         name = "fractured-world-chessboard-distance",
-        intended_property = "fw_elevation",
+        intended_property = "fw_distance",
         expression = noise.define_noise_function(function(x, y, tile, map)
+            x = x + size / 2
+            y = y + size / 2
             return functions.distance(modulo(x, size) - size / 2, modulo(y, size) - size / 2,
                                       "chessboard")
         end)
@@ -184,7 +195,7 @@ data:extend{
         type = "noise-expression",
         name = "fw_default_size",
         intended_property = "fw_default_size",
-        expression = tne(256)
+        expression = tne(settings.startup["fractured-world-default-cell-size"].value)
     }
 }
 
