@@ -108,9 +108,23 @@ local function distance(x, y, metric)
     end
 end
 
+---Smoothly transition between two values
+---@param val number @The value to be smoothed
+---@param edge0 number @The lower value
+---@param edge1 number @The upper value
+---@return number
 local function smooth_step(val, edge0, edge1)
-    local t = noise.clamp((val - edge0) / (edge1 - edge0), 0.0, 1.0);
+    local t = noise.clamp((val - edge0) / (edge1 - edge0), 0.0, 1.0)
     return t * t * (3.0 - 2.0 * t);
+end
+
+local function medium_step(val, edge0, edge1)
+    local t = noise.clamp((val - edge0) / (edge1 - edge0), 0.0, 1.0)
+    return t ^ 4 * (3 - 2 * t)
+end
+local function sharp_step(val, edge0, edge1)
+    local t = noise.clamp((val - edge0) / (edge1 - edge0), 0.0, 1.0)
+    return (1 / (1 - t / 2) - 1) ^ 3
 end
 
 local function pseudo_sin(val)
@@ -174,6 +188,8 @@ return {
     make_interpolation = make_interpolation,
     distance = distance,
     smooth_step = smooth_step,
+    medium_step = medium_step,
+    sharp_step = sharp_step,
     pseudo_random = pseudo_random,
     get_random_point = get_random_point,
     rof = random_offset_factor,

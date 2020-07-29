@@ -182,6 +182,29 @@ end
 -- TODO:create noise program to return closest two distances and angles
 -- TODO:create noise program to return border points
 -- TODO:create noise program to return bridge points
+
+local function create_elevation(waterInfluence,
+                                waterSlider,
+                                effectiveDistance,
+                                scale,
+                                waterOffset)
+    return
+        (waterInfluence * waterSlider - effectiveDistance * scale) - noise.var("fw_default_size") /
+            2 + waterOffset + noise.var("small-noise") / 15 * small_noise_factor
+end
+
+local function create_starting_elevation(elevation, scaledDistance)
+
+    local starting_area_factor = functions.sharp_step(-scaledDistance, -1, -1.5)
+    local everything_else_factor = functions.sharp_step(scaledDistance, 1.5, 2)
+    return (10 * (starting_area_factor) + elevation * everything_else_factor)
+end
+
+local function create_starting_moisture(moisture, scaledDistance)
+
+    local moisture_factor = functions.less_than(-scaledDistance, -3 / 2)
+    return moisture -- (1 - moisture_factor) + moisture * moisture_factor
+end
 --[[local function make_ridges(octaves, baseAmplitude, persistence, amplitudeScaling)
     local result = 0
     octaves = octaves or 1
@@ -208,14 +231,7 @@ end
         scale = scale / persistence
     end
     return (1 - 2 * result / maximum) ^ 2
-end
-
-local function make_grid()
-    return noise.min(noise.ridge(noise.var("x") * noise.var("segmentation_multiplier"), 0,
-                                 defaultSize) *
-                         noise.ridge(noise.var("y") * noise.var("segmentation_multiplier"), 0,
-                                     defaultSize))
-end]]
+end--]]
 
 return {
     waves = waves,
@@ -225,7 +241,9 @@ return {
     get_closest_point_and_value = get_closest_point_and_value,
     get_closest_two_points = get_closest_two_points,
     small_noise_factor = small_noise_factor, --[[
-    make_ridges = make_ridges,
-    make_grid = make_grid,]]
-    landDensity = landDensity
+    make_ridges = make_ridges,]]
+    landDensity = landDensity,
+    create_elevation = create_elevation,
+    create_starting_elevation = create_starting_elevation,
+    create_starting_moisture = create_starting_moisture
 }

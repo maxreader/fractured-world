@@ -37,27 +37,31 @@ local function make_voronoi_preset(name, args)
     local pointDistance
 
     local scale = noise.var("segmentation_multiplier")
-    local x = noise.var("x") + size / 2
-    local y = (noise.var("y") + size / 2) * aspectRatio
+    local x = noise.var("x")
+    local y = noise.var("y")
+    local scaledDistance = functions.distance(x, y, distanceType) /
+                               noise.var("starting_area_radius")
+    x = x + size / 2
+    y = (y + size / 2) * aspectRatio
     local waterSlider = noise.var("wlc_elevation_offset")
 
     if class == "one-point" then
         local point = get_closest_point_and_value(x, y, size, distanceType, pointType)
-        elevation = (waterSlider * waterInfluence - 2 * point.distance * scale +
-                        noise.var("fw_default_size") / 2 + noise.var("small-noise") / 15 *
-                        small_noise_factor + waterOffset)
+        elevation = fnp.create_elevation(waterInfluence, waterSlider, 2 * point.distance, scale,
+                                         waterOffset)
         value = point.value
         pointDistance = point.distance
     elseif class == "two-point" then
         local points = get_closest_two_points(x, y, size, distanceType, pointType)
         local d1 = points.distance
         local d2 = points.secondDistance
-        elevation = (waterInfluence * waterSlider - (d1 - d2) * scale) -
-                        noise.var("fw_default_size") / 2 + noise.var("small-noise") / 15 *
-                        small_noise_factor + waterOffset
-        value = points.value
+        elevation = fnp.create_elevation(waterInfluence, waterSlider, (d1 - d2), scale, waterOffset)
         pointDistance = points.distance
+        value = points.value
     end
+
+    elevation = fnp.create_starting_elevation(elevation, scaledDistance)
+    value = fnp.create_starting_moisture(value, scaledDistance)
 
     data:extend{
         {
