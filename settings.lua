@@ -3,7 +3,7 @@ local fw_settings = {
         type = "int-setting",
         name = "fractured-world-default-cell-size",
         setting_type = "startup",
-        default_value = 256,
+        default_value = 128,
         minimum_value = 0
     }, {
         type = "double-setting",
