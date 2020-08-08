@@ -9,45 +9,16 @@ end
 
 local function floorDiv(val, divisor)
     divisor = divisor or 1
-    return noise.terrace(val / divisor, 0, 1, 1)
+    return noise.floor(val / divisor)
 end
 local function modulo(val, range)
-    range = range or 1
-    return val - noise.terrace(val, 0, range, 1)
+    range = noise.absolute_value(range or 1)
+    local quotient = val / range
+    return (quotient - noise.floor(quotient)) * range -- noise.fmod(val, range)
 end
 
-local function bitwiseAND(x1, x2)
-    -- assume x1 and x2 are both integers
-    if not (x1 and x2) then return 0 end
-    x1 = floorDiv(x1)
-    x2 = floorDiv(x2)
-    local result = 0
-    for bit = 0, 15 do
-        result = result + modulo(x1, 2) * modulo(x2, 2) * 2 ^ bit
-        x1 = floorDiv(x1, 2)
-        x2 = floorDiv(x2, 2)
-    end
-    return result
-end
-
-local function bitwiseXOR(x1, x2)
-    -- assume x1 and x2 are both integers
-    if not (x1 and x2) then return 0 end
-    x1 = floorDiv(x1)
-    x2 = floorDiv(x2)
-    local result = 0
-    for bit = 0, 15 do
-        result = result + modulo(x1 + x2, 2) * 2 ^ bit
-        x1 = floorDiv(x1, 2)
-        x2 = floorDiv(x2, 2)
-    end
-    return result
-end
 ---Is a > b?
-local function greater_than(a, b) return noise.clamp((a - b) * math.huge, 0, 1) end
----Is a < b?
-local function less_than(a, b) return noise.clamp((b - a) * math.huge, 0, 1) end
-local function equal_to(a, b) return 1 - greater_than(a, b) - less_than(a, b) end
+local function greater_than(a, b) return noise.less_than(b, a) end
 
 local function reduce(reducer, list)
     local result = list[1]
@@ -62,6 +33,8 @@ local function get_extremum(func, values)
         return reduce(function(a, b) return noise.clamp(a, -math.huge, b) end, values)
     end
 end
+
+local function sum_table(values) return reduce(function(a, b) return a + b end, values) end
 
 local function scale_table(values, scalar)
     local returnTable = {}
@@ -126,25 +99,17 @@ local function sharp_step(val, edge0, edge1)
     local t = noise.clamp((val - edge0) / (edge1 - edge0), 0.0, 1.0)
     return (1 / (1 - t / 2) - 1) ^ 3
 end
-
-local function pseudo_sin(val)
-    val = modulo(val, pi * 4)
-    local factor = noise.clamp((val - 2 * pi) * math.huge, -1, 1)
-    val = val / 2
-    return ( --[[-0.417698 * val ^ 2 + ]] 1.312236 * val - 0.050465) * factor
-end
-
 ---Get a random point for a given coordinate pair.
 ---@param x number
 ---@param y number
 ---@return number
 local function pseudo_random(x, y)
-    x = ( --[[97 * --]] x) or 1
-    y = ( --[[43 * --]] y) or 1
-    local x0 = noise.var("map_seed") / 2 ^ 32
-    local y0 = tne(0.234561)
+    x = x or 1
+    y = y or 1
+    local x0 = noise.var("map_seed") / 2 ^ 34
+    local y0 = tne(0.534561)
     local angle = (x * x0 + y * y0)
-    return modulo(pseudo_sin(angle * 49300))
+    return modulo(noise.sin(angle * 49300))
 end
 
 --- Get a random point within a cell.
@@ -176,13 +141,10 @@ return {
     slider_to_scale = slider_to_scale,
     floorDiv = floorDiv,
     modulo = modulo,
-    bitwiseAND = bitwiseAND,
-    bitwiseXOR = bitwiseXOR,
     greater_than = greater_than,
-    less_than = less_than,
-    equal_to = equal_to,
     reduce = reduce,
     get_extremum = get_extremum,
+    sum_table = sum_table,
     scale_table = scale_table,
     multiply_probabilities = multiply_probabilities,
     make_interpolation = make_interpolation,

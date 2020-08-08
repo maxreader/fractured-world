@@ -130,7 +130,7 @@ local function get_infinite_probability(ore)
         }
     }
     -- if the island is dry, *or* if it has biters on it, place the infinite ore
-    local moistureFactor = noise.max(functions.less_than(noise.var("moisture"), tne(0.5)),
+    local moistureFactor = noise.max(noise.less_than(noise.var("moisture"), tne(0.5)),
                                      noise.var("fractured-world-biter-islands"))
     local sizeMultiplier = noise.get_control_setting(ore).size_multiplier
     local randomness = noise.clamp(noise.var("small-noise"), 1, 10)

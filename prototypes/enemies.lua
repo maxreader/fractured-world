@@ -62,12 +62,12 @@ data:extend{
     {
         type = "noise-expression",
         name = "fractured-world-biter-islands",
-        expression = functions.less_than(moisture, thisFrequency)
+        expression = noise.less_than(moisture, thisFrequency)
     }
 }
 local islandsWithBiters = noise.var("fractured-world-biter-islands")
-local spawnerCircle = noise.delimit_procedure(functions.less_than(thisSize, scaledRadius / 1.45))
-local wormCircle = noise.delimit_procedure(functions.less_than(thisSize, scaledRadius / 1.3))
+local spawnerCircle = noise.delimit_procedure(noise.less_than(thisSize, scaledRadius / 1.45))
+local wormCircle = noise.delimit_procedure(noise.less_than(thisSize, scaledRadius / 1.3))
 
 local count = 0
 local function make_enemy_autoplace(type, prototypeData, penalty_multiplier)
