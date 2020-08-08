@@ -24,46 +24,49 @@ if mods["alien-biomes"] then
     temperatureFloor = -20
 end
 
-local function make_voronoi_preset(name, args)
-    local params = args.voronoi or {}
-    local class = params.class or "one-point"
-    local distanceType = params.distanceType or "euclidean"
-    local pointType = params.pointType or "random"
-    local waterInfluence = params.waterInfluence or 6
-    local waterOffset = params.waterOffset or 100
-    local aspectRatio = params.aspectRatio or 1
+local function make_voronoi_preset(name, presetData)
+    local args = presetData.voronoi or {}
+    local class = args.class or "one-point"
+    local aspectRatio = args.aspectRatio or 1
+    args.size = size
     local elevation
     local value
     local pointDistance
 
-    local scale = noise.var("segmentation_multiplier")
     local x = noise.var("x")
     local y = noise.var("y")
-    local scaledDistance = functions.distance(x, y, distanceType) /
-                               noise.var("starting_area_radius")
-    x = x + size / 2
-    y = (y + size / 2) * aspectRatio
-    local waterSlider = noise.var("wlc_elevation_offset")
+    local offsetFactor = args.offsetFactor or 1
+    local offset = offsetFactor * size / 2
+
+    x = x + offset
+    y = (y + offset) * aspectRatio
 
     if class == "one-point" then
-        local point = get_closest_point_and_value(x, y, size, distanceType, pointType)
-        elevation = fnp.create_elevation(waterInfluence, waterSlider, 2 * point.distance, scale,
-                                         waterOffset) + noise.var("fw_default_size") /
-            2
+        local point = get_closest_point_and_value(x, y, args)
+        elevation = fnp.create_elevation(2 * point.distance, args) -- + noise.var("fw_default_size") / 2
         value = point.value
         pointDistance = point.distance
     elseif class == "two-point" then
-        local points = get_closest_two_points(x, y, size, distanceType, pointType)
+        local points = get_closest_two_points(x, y, args)
         local d1 = points.distance
         local d2 = points.secondDistance
-        elevation = fnp.create_elevation(waterInfluence, waterSlider, (d1 - d2), scale, waterOffset)  - noise.var("fw_default_size") /
-            2
+        elevation = fnp.create_elevation((d1 - d2), args) - noise.var("fw_default_size") * 3 / 2 -- ]]
         pointDistance = points.distance
         value = points.value
+
+        -- local border = fnp.is_border(d1, d2, points.hypot)
+        --[[local isBridge = fnp.is_bridge(d1, d2, points.hypot, points.angle)
+        local bridge = 10 - isBridge / functions.size * 500]]
+        -- elevation = border / functions.size * 1000 - 100
+        --[[local percentFromBorder = border / points.hypot
+        elevation = 100 * percentFromBorder - 50 + waterSlider--]]
+
     end
 
-    elevation = fnp.create_starting_elevation(elevation, scaledDistance)
-    value = fnp.create_starting_moisture(value, scaledDistance)
+    local final = fnp.create_starting_area(elevation, value, pointDistance, args)
+    elevation = final.elevation
+    value = final.value
+    pointDistance = final.pointDistance
 
     data:extend{
         {
@@ -185,14 +188,13 @@ data:extend{
                 octave_input_scale_multiplier = tne(0.8)
             }
         }
-    }, --[[{
+    }, {
         type = "noise-expression",
         name = "ridges",
         order = "4000",
         intended_property = "elevation",
-        expression = (fnp.make_ridges(4, 10, 0.5, 0.5) * 100 - 50) * functions.rof ^ 0.5 +
-            (size - fnp.make_grid() + 25.6) * (1 - functions.rof ^ 0.5) / 51.2 + 5
-    },]] {
+        expression = (fnp.make_ridges(4, 10, 0.5, 0.5) * 100 - 50)
+    }, {
         type = "noise-expression",
         name = "fw_distance",
         intended_property = "fw_distance",

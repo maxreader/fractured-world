@@ -1,7 +1,12 @@
 local fnp = require("prototypes.fractured-noise-programs")
 return {
     ["default"] = {
-        voronoi = {class = "two-point", waterInfluence = 4}
+        presetDefaults = {size = 1, water = 0.5},
+        voronoi = {
+            class = "two-point",
+            waterInfluence = 3
+            -- waterOffset = math.log(1 / 6, 2)
+        }
     },
     ["circles"] = {},
     ["squares"] = {voronoi = {distanceType = "chessboard"}},
@@ -18,14 +23,16 @@ return {
     ["hexagons"] = {
         presetDefaults = {
             frequency = 6,
-            size = 1 / 6,
+            size = 3 / 4,
             water = 1 / 4
         },
         voronoi = {
             class = "two-point",
             pointType = "hexagon",
-            waterOffsset = 150,
-            aspectRatio = math.sqrt(3 / 4)
+            waterInfluence = 3,
+            aspectRatio = math.sqrt(3 / 4),
+            waterOffset = 100,
+            offsetFactor = 0
         }
     },
     ["spiral"] = {
@@ -45,7 +52,6 @@ return {
     },
     ["maze"] = {
         defaultSize = 64,
-        presetDefaults = {frequency = 6},
         cartesian = fnp.is_maze_square
     }
 }
