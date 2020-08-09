@@ -29,7 +29,9 @@ local currentResourceData = {}
 for k, v in pairs(rawResourceData) do
     if mods[k] then
         for ore, oreData in pairs(v) do
-            if resources[ore] then currentResourceData[ore] = oreData end
+            if resources[ore] and resources[ore].autoplace then
+                currentResourceData[ore] = oreData
+            end
         end
     end
 end
@@ -39,12 +41,10 @@ local regular_patches = resource_autoplace__patch_metasets.regular.patch_set_ind
 
 -- pick up any ores not in the raw dataset and give them a default
 for ore, index in pairs(regular_patches) do
-    if resources[ore] and not currentResourceData[ore] then
+    if resources[ore] and resources[ore].autoplace and not currentResourceData[ore] then
         currentResourceData[ore] = {density = 8}
     end
 end
-
--- TODO: add mod setting for infinite ores being "normal" ores or on their main patch
 
 --[[
     1. See if ore has infinite in the name, and is infinite
@@ -69,9 +69,26 @@ for ore, oreData in pairs(currentResourceData) do
         end
     end
     if starting_patches[ore] then
-        currentResourceData[ore].starting_patch = true
         startingOreCount = startingOreCount + 1
+        currentResourceData[ore].starting_patch = startingOreCount
     end
+end
+--[[
+generate locations for starting ores
+divide circle into n slices
+for each slice, generate a point from 0-0.5 of the slice angle,
+    0.25 to 0.75 the "total" distance to the edge
+]]
+local sliceSize = 2 * math.pi / startingOreCount
+local startingAreaRadius = 120
+local startingPoints = {}
+for i = 1, startingOreCount do
+    local random = functions.get_random_point(i, i, startingAreaRadius)
+    local radius = (random.y) / 2 + startingAreaRadius / 4
+    local angle = random.x / startingAreaRadius * sliceSize / 2 + i * sliceSize
+    local point_x = radius * noise.cos(angle)
+    local point_y = radius * noise.sin(angle)
+    startingPoints[i] = {x = point_x, y = point_y}
 end
 
 --[[
@@ -166,12 +183,32 @@ local function get_infinite_richness(ore)
                      minimumRichness)
 end
 
+local starting_factor = noise.delimit_procedure(noise.min(-noise.min(radius, 0) * math.huge, 1))
+
+local startingPatchRadius = 15
 local function get_probability(ore)
     local oreData = currentResourceData[ore]
+
+    local settings = noise.get_control_setting(ore)
     local randProb = oreData.randProb or 1
     local aboveMinimum = noise.max(0, aux - oreData.startLevel)
     local belowMaximum = noise.max(0, oreData.endLevel - aux)
     local probability_expression = noise.clamp(aboveMinimum * belowMaximum * math.huge, 0, 1)
+    probability_expression = probability_expression * (tne(1) - starting_factor)
+    if oreData.starting_patch then
+        startingPatchRadius = startingPatchRadius * settings.size_multiplier ^ 0.5
+        local startingPoint = startingPoints[oreData.starting_patch]
+        local point_x = startingPoint.x
+        local point_y = startingPoint.y
+        local x = noise.var("x")
+        local y = noise.var("y")
+        local distanceFromPoint = functions.distance(point_x - x, point_y - y)
+        -- TODO: add variation to starting ores based on "starting patch radius"
+        probability_expression = probability_expression +
+                                     noise.less_than(distanceFromPoint, startingPatchRadius +
+                                                         (noise.var("small-noise") / 25))
+    end
+
     if randProb < 1 then
         probability_expression = probability_expression * tne {
             type = "function-application",
@@ -206,8 +243,10 @@ local function get_richness(ore)
         oreCountMultiplier, variance,
         1 / tne(fnp.landDensity)
     }
-    return noise.max((functions.multiply_probabilities(factors) + addRich) * postMult,
-                     minimumRichness)
+    local richness_expression = noise.max((functions.multiply_probabilities(factors) + addRich) *
+                                              postMult, minimumRichness)
+
+    return richness_expression
 end
 
 return {
