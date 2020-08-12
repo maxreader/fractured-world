@@ -60,7 +60,7 @@ local function is_random_square(x, y)
     return (greater_than(value, probability))
 end
 
-local function is_maze_square(x, y)
+local function is_polytopic_square(x, y)
     local maxNeighbors = floorDiv((1 - rof) * 8)
     local cellsToBeBorn = floorDiv(ssnf * 8)
     local neighbors = 0
@@ -253,14 +253,14 @@ local function create_elevation(effectiveDistance, args)
     local waterInfluence = args.waterInfluence or 6
     local waterOffset = args.waterOffset or 100
     return (waterInfluence * waterSlider - effectiveDistance * scale) + waterOffset +
-               noise.var("small-noise") / 25 * small_noise_factor
+               noise.var("fw-scaling-noise") / 25 * small_noise_factor
 end
 
-local startingAreaInnerRadius = 120
-local startingAreaOuterRadius = 300
+local defaultSize = noise.var("fw_default_size")
+local startingAreaOuterRadius = 3 * defaultSize
 
-local function create_starting_area(elevation, value, pointDistance, args)
-    local smallNoise = noise.var("small-noise") * small_noise_factor / 15
+local function create_voronoi_starting_area(elevation, value, pointDistance, args)
+    local smallNoise = noise.var("fw-large-noise") * small_noise_factor / 15
     args.size = startingAreaOuterRadius
     if args.class == "two-point" and args.pointType ~= "hexagon" then
         args.size = args.size * 3 / 4
@@ -289,8 +289,7 @@ local function create_starting_area(elevation, value, pointDistance, args)
                              startingAreaOuterRadius / 2
     end
 
-    local starting_factor = (startingAreaInnerRadius / scaledDistance - fadeOutFactor) /
-                                (1 - fadeOutFactor)
+    local starting_factor = (defaultSize / scaledDistance - fadeOutFactor) / (1 - fadeOutFactor)
     starting_factor = noise.min(starting_factor, 1)
     local startingElevation = starting_factor * 100 + smallNoise
     local regular_factor = noise.delimit_procedure(
@@ -343,7 +342,7 @@ return {
     waves = waves,
     on_spiral = on_spiral,
     is_random_square = is_random_square,
-    is_maze_square = is_maze_square,
+    is_polytopic_square = is_polytopic_square,
     get_closest_point_and_value = get_closest_point_and_value,
     get_closest_two_points = get_closest_two_points,
     is_bridge = is_bridge,
@@ -352,5 +351,5 @@ return {
     make_ridges = make_ridges,
     landDensity = landDensity,
     create_elevation = create_elevation,
-    create_starting_area = create_starting_area
+    create_voronoi_starting_area = create_voronoi_starting_area
 }

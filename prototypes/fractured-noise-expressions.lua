@@ -63,7 +63,7 @@ local function make_voronoi_preset(name, presetData)
 
     end
 
-    local final = fnp.create_starting_area(elevation, value, pointDistance, args)
+    local final = fnp.create_voronoi_starting_area(elevation, value, pointDistance, args)
     elevation = final.elevation
     value = final.value
     pointDistance = final.pointDistance
@@ -108,7 +108,11 @@ local function make_cartesian_preset(name, args)
                     local localX = noise.absolute_value(modulo(x, size) - size / 2) - 1
                     local localY = noise.absolute_value(modulo(y, size) - size / 2) - 1
                     local height = size / 2 - distance(localX, localY, "chessboard")
-                    return generating_function(cellX, cellY) * height * -2 + height - 1
+                    local isOrigin = 1 -
+                                         noise.max(1, noise.absolute_value(cellX) +
+                                                       noise.absolute_value(cellY))
+                    return noise.max(generating_function(cellX, cellY), isOrigin) * height * -2 +
+                               height - 1
                 end)
         }
     }
@@ -165,14 +169,15 @@ data:extend{
         name = "fractured-world-chessboard-distance",
         intended_property = "fw_distance",
         expression = noise.define_noise_function(function(x, y, tile, map)
-            x = x + size / 2
-            y = y + size / 2
-            return functions.distance(modulo(x, size) - size / 2, modulo(y, size) - size / 2,
-                                      "chessboard")
+            local distanceToOrigin = functions.distance(x, y, "chessboard")
+            local starting_factor = noise.clamp((distanceToOrigin - size) * math.huge, -1, 1)
+            x = modulo(x + size / 2, size) - size / 2
+            y = modulo(y + size / 2, size) - size / 2
+            return functions.distance(x, y, "chessboard") * starting_factor
         end)
     }, {
         type = "noise-expression",
-        name = "small-noise",
+        name = "fw-scaling-noise",
         expression = {
             type = "function-application",
             function_name = "factorio-quick-multioctave-noise",
@@ -182,6 +187,42 @@ data:extend{
                 seed0 = tne(004),
                 seed1 = noise.var("map_seed"),
                 input_scale = tne(1 / 10 * noise.var("segmentation_multiplier")),
+                output_scale = tne(10),
+                octaves = tne(4),
+                octave_output_scale_multiplier = tne(2),
+                octave_input_scale_multiplier = tne(0.8)
+            }
+        }
+    }, {
+        type = "noise-expression",
+        name = "fw-large-noise",
+        expression = {
+            type = "function-application",
+            function_name = "factorio-quick-multioctave-noise",
+            arguments = {
+                x = noise.var("x"),
+                y = noise.var("y"),
+                seed0 = tne(004),
+                seed1 = noise.var("map_seed"),
+                input_scale = tne(1 / 10 * noise.var("fw_default_size") / 128),
+                output_scale = tne(10),
+                octaves = tne(4),
+                octave_output_scale_multiplier = tne(2),
+                octave_input_scale_multiplier = tne(0.8)
+            }
+        }
+    }, {
+        type = "noise-expression",
+        name = "fw-small-noise",
+        expression = {
+            type = "function-application",
+            function_name = "factorio-quick-multioctave-noise",
+            arguments = {
+                x = noise.var("x"),
+                y = noise.var("y"),
+                seed0 = tne(004),
+                seed1 = noise.var("map_seed"),
+                input_scale = tne(2 / 10),
                 output_scale = tne(10),
                 octaves = tne(4),
                 octave_output_scale_multiplier = tne(2),

@@ -80,7 +80,7 @@ for each slice, generate a point from 0-0.5 of the slice angle,
     0.25 to 0.75 the "total" distance to the edge
 ]]
 local sliceSize = 2 * math.pi / startingOreCount
-local startingAreaRadius = 120
+local startingAreaRadius = noise.var("fw_default_size")
 local startingPoints = {}
 for i = 1, startingOreCount do
     local random = functions.get_random_point(i, i, startingAreaRadius)
@@ -150,7 +150,7 @@ local function get_infinite_probability(ore)
     local moistureFactor = noise.max(noise.less_than(noise.var("moisture"), tne(0.5)),
                                      noise.var("fractured-world-biter-islands"))
     local sizeMultiplier = noise.get_control_setting(ore).size_multiplier
-    local randomness = noise.clamp(noise.var("small-noise"), 1, 10)
+    local randomness = noise.clamp(noise.var("fw-scaling-noise"), 1, 10)
     local probabilities = {
         tne(10), parentProbability, moistureFactor,
         noise.var("fractured-world-" .. ore .. "radial-multiplier"),
@@ -185,7 +185,8 @@ end
 
 local starting_factor = noise.delimit_procedure(noise.min(-noise.min(radius, 0) * math.huge, 1))
 
-local startingPatchRadius = 15
+local startingPatchScaleFactor = noise.min(startingAreaRadius / 128, 1)
+local startingPatchDefaultRadius = 15 * startingPatchScaleFactor
 local function get_probability(ore)
     local oreData = currentResourceData[ore]
 
@@ -196,7 +197,7 @@ local function get_probability(ore)
     local probability_expression = noise.clamp(aboveMinimum * belowMaximum * math.huge, 0, 1)
     probability_expression = probability_expression * (tne(1) - starting_factor)
     if oreData.starting_patch then
-        startingPatchRadius = startingPatchRadius * settings.size_multiplier ^ 0.5
+        local startingPatchRadius = startingPatchDefaultRadius * settings.size_multiplier ^ 0.5
         local startingPoint = startingPoints[oreData.starting_patch]
         local point_x = startingPoint.x
         local point_y = startingPoint.y
@@ -206,10 +207,12 @@ local function get_probability(ore)
         -- TODO: add variation to starting ores based on "starting patch radius"
         probability_expression = probability_expression +
                                      noise.less_than(distanceFromPoint, startingPatchRadius +
-                                                         (noise.var("small-noise") / 25))
+                                                         (noise.var("fw-small-noise") / 25))
     end
 
     if randProb < 1 then
+        -- Adjustment so there isn't a ridiculous number of patches on an island
+        randProb = randProb / 4
         probability_expression = probability_expression * tne {
             type = "function-application",
             function_name = "random-penalty",
@@ -221,7 +224,7 @@ local function get_probability(ore)
             }
         }
     end
-    return probability_expression
+    return noise.clamp(probability_expression, -10, 10)
 end
 
 local function get_richness(ore)
@@ -230,6 +233,8 @@ local function get_richness(ore)
     local addRich = oreData.addRich or 0
     local postMult = oreData.postMult or 1
     local minimumRichness = oreData.minRich or 0
+    local randProb = oreData.randProb
+    if randProb then randProb = randProb / 4 end
     local settings = noise.get_control_setting(ore)
 
     local variance = (aux - oreData.startLevel) / (oreData.endLevel - oreData.startLevel) *
@@ -241,7 +246,9 @@ local function get_richness(ore)
         settings.size_multiplier,
         1 / noise.max(oreData.randProb or 1, 1),
         oreCountMultiplier, variance,
-        1 / tne(fnp.landDensity)
+        1 / tne(fnp.landDensity),
+        noise.max(1 / startingPatchScaleFactor, 1),
+        noise.clamp(noise.absolute_value(noise.var("fw-small-noise") / 25 + 2), 0.5, 2)
     }
     local richness_expression = noise.max((functions.multiply_probabilities(factors) + addRich) *
                                               postMult, minimumRichness)
