@@ -11,10 +11,11 @@ local get_extremum = functions.get_extremum
 local small_noise_factor = noise.get_control_setting("island-randomness").size_multiplier
 local ssnf = functions.slider_to_scale("control-setting:island-randomness:size:multiplier")
 local waterLevel = -(noise.var("wlc_elevation_offset"))
-local landDensity = noise.delimit_procedure(145 * waterLevel ^ 2 - 10660 * waterLevel + 212200)
+local landDensity = noise.delimit_procedure(75.17 * waterLevel ^ 2 - 18503 * waterLevel + 451000)
 -- TODO: Create functions to make starting areas. First, make single island map type, then transition between the two
 
 local function waves(x, y)
+    y = y - 1
     x = modulo(x, 4) * (1 - ssnf) + modulo(y, 4) * ssnf
     y = modulo(y, 4) * (1 - ssnf) + modulo(x, 4) * ssnf
     return 1 - noise.clamp(greater_than(y, 0) - modulo(x, 2) * (1 - noise.equals(y, x)), 0, 1)
@@ -35,8 +36,8 @@ end
 local function get_hexagon_point(x, y, width)
     local randPoint = get_random_point(x, y, width)
     local val = randPoint.val
-    local oddX = modulo(x, 2)
-    y = width * oddX / 2
+    local oddY = modulo(y, 2)
+    x = width * oddY / 2
     y = y * (1 - rof) + rof * randPoint.y
     x = x * (1 - rof) + rof * randPoint.x
     return {x = x, y = y, val = val}
@@ -70,10 +71,17 @@ local function is_polytopic_square(x, y)
     return noise.max(alive, noise.equals(cellsToBeBorn, neighbors))
 end
 
+local function is_trellis_square(x, y)
+    x = modulo(x, 2)
+    y = modulo(y, 2)
+    return noise.min(x, y)
+end
+
 local function get_point_data(x, y, args)
     local width = args.size or 128
     local pointType = args.pointType or "random"
     local startingArea = args.startingArea
+    local aspectRatio = args.aspectRatio or 1
     local distances = {}
     local values = {}
     local angles = {}
@@ -89,7 +97,6 @@ local function get_point_data(x, y, args)
         cY = 0
         lX = x
         lY = y
-        if pointType ~= "hexagon" then rof = rof / 2 end
     end
 
     -- Iterate through neighboring cells, and put point data into tables
@@ -98,7 +105,9 @@ local function get_point_data(x, y, args)
         for u = -1, 1, 1 do
             local s = noise.delimit_procedure(tne(u) + cX)
             local factor = 1
-            -- if startingArea then factor = 1 + modulo(u + v, 2) * (math.sqrt(2) - 1) end
+            if startingArea and pointType ~= "hexagon" then
+                factor = 1 + modulo(u + v, 2) * (math.sqrt(2) - 1)
+            end
 
             local point
             local point_x
@@ -121,6 +130,7 @@ local function get_point_data(x, y, args)
             -- putting coordinates into "local" coordinates
             local relativeX = width * u * factor + point_x - lX - 0.001
             local relativeY = width * v * factor + point_y - lY - 0.001
+            relativeX = relativeX / aspectRatio
 
             -- add data for this point to tables
             distances[count] = distance(relativeX, relativeY, args.distanceType)
@@ -250,7 +260,7 @@ local function is_border(d1, d2, hypot) return noise.absolute_value(d2 ^ 2 - d1 
 local function create_elevation(effectiveDistance, args)
     local waterSlider = noise.var("wlc_elevation_offset")
     local scale = noise.var("segmentation_multiplier")
-    local waterInfluence = args.waterInfluence or 6
+    local waterInfluence = args.waterInfluence or 3
     local waterOffset = args.waterOffset or 100
     return (waterInfluence * waterSlider - effectiveDistance * scale) + waterOffset +
                noise.var("fw-scaling-noise") / 25 * small_noise_factor
@@ -262,12 +272,10 @@ local startingAreaOuterRadius = 3 * defaultSize
 local function create_voronoi_starting_area(elevation, value, pointDistance, args)
     local smallNoise = noise.var("fw-large-noise") * small_noise_factor / 15
     args.size = startingAreaOuterRadius
-    if args.class == "two-point" and args.pointType ~= "hexagon" then
-        args.size = args.size * 3 / 4
-    end
     local offset = args.size / 2 * (args.offsetFactor or 1)
-    local x = noise.var("x")
-    local y = noise.var("y")
+    local rotatedCoordinates = functions.rotate_map()
+    local x = rotatedCoordinates.x
+    local y = rotatedCoordinates.y
     local distanceToOrigin = functions.distance(x, y, args.distanceType)
     local scaledDistance = distanceToOrigin
     local distanceForOres = distanceToOrigin
@@ -291,7 +299,12 @@ local function create_voronoi_starting_area(elevation, value, pointDistance, arg
 
     local starting_factor = (defaultSize / scaledDistance - fadeOutFactor) / (1 - fadeOutFactor)
     starting_factor = noise.min(starting_factor, 1)
-    local startingElevation = starting_factor * 100 + smallNoise
+    -- To fix weird holes in the center on the default preset
+    local absolute_starting_factor = noise.min(defaultSize -
+                                                   functions.distance(x - offset, y - offset,
+                                                                      args.distanceType), 1)
+    local startingElevation = noise.max(starting_factor, absolute_starting_factor) * 100 +
+                                  smallNoise
     local regular_factor = noise.delimit_procedure(
                                noise.clamp(
                                    (distanceToOrigin + smallNoise - startingAreaOuterRadius + 1) *
@@ -343,6 +356,7 @@ return {
     on_spiral = on_spiral,
     is_random_square = is_random_square,
     is_polytopic_square = is_polytopic_square,
+    is_trellis_square = is_trellis_square,
     get_closest_point_and_value = get_closest_point_and_value,
     get_closest_two_points = get_closest_two_points,
     is_bridge = is_bridge,

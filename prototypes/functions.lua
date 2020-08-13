@@ -20,6 +20,14 @@ end
 ---Is a > b?
 local function greater_than(a, b) return noise.less_than(b, a) end
 
+local function dot(vec1, vec2)
+    local result = 0
+    if not vec2 then vec2 = vec1 end
+    if #vec1 ~= #vec2 then error("Vectors of different dimesion cannot be multiplied") end
+    for i = 1, #vec1 do result = result + vec1[i] * vec2[i] end
+    return result
+end
+
 local function reduce(reducer, list)
     local result = list[1]
     for i = 2, #list do result = reducer(result, list[i]) end
@@ -61,6 +69,21 @@ local function make_interpolation(x0, y0, x1, y1)
     return function(x) return (x - x0) / (x1 - x0) * (y0 - y1) + y1 end
 end
 
+local function rotate_coordinates(x, y, angle)
+    local newX = x * noise.cos(angle) - y * noise.sin(angle)
+    local newY = x * noise.sin(angle) + y * noise.cos(angle)
+    return {x = newX, y = newY}
+end
+
+local function rotate_map(x, y)
+    x = x or noise.var("x")
+    y = y or noise.var("y")
+    local smallRotationFactor = 1 - slider_to_scale("control-setting:map-rotation:size:multiplier")
+    local largeRotationFactor = slider_to_scale("control-setting:map-rotation:frequency:multiplier")
+    local rotationFactor = largeRotationFactor * 2 * math.pi + smallRotationFactor * math.pi / 6
+    return (rotate_coordinates(x, y, rotationFactor * math.pi / 2))
+end
+
 ---Get the distance to a point
 ---@param x number
 ---@param y number
@@ -76,6 +99,10 @@ local function distance(x, y, metric)
         return x + y
     elseif metric == "chessboard" then
         return noise.max(x, y)
+    elseif metric == "hexagonal" then
+        local x1 = 1 / 2
+        local y1 = math.sqrt(3) / 2
+        return noise.max(dot({x, y}, {x1, y1}), x)
     else
         return error("metric: " .. metric .. ", is not a valid distance metric")
     end
@@ -148,6 +175,8 @@ return {
     scale_table = scale_table,
     multiply_probabilities = multiply_probabilities,
     make_interpolation = make_interpolation,
+    rotate_coordinates = rotate_coordinates,
+    rotate_map = rotate_map,
     distance = distance,
     smooth_step = smooth_step,
     medium_step = medium_step,

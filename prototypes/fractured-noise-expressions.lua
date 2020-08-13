@@ -33,13 +33,14 @@ local function make_voronoi_preset(name, presetData)
     local value
     local pointDistance
 
-    local x = noise.var("x")
-    local y = noise.var("y")
+    local rotatedCoordinates = functions.rotate_map()
+    local x = rotatedCoordinates.x
+    local y = rotatedCoordinates.y
     local offsetFactor = args.offsetFactor or 1
     local offset = offsetFactor * size / 2
 
-    x = x + offset
-    y = (y + offset) * aspectRatio
+    x = (x + offset) * aspectRatio
+    y = (y + offset)
 
     if class == "one-point" then
         local point = get_closest_point_and_value(x, y, args)
@@ -101,6 +102,9 @@ local function make_cartesian_preset(name, args)
             order = "4000",
             expression = noise.define_noise_function(
                 function(x, y, tile, map)
+                    local rotatedCoordinates = functions.rotate_map()
+                    x = rotatedCoordinates.x
+                    y = rotatedCoordinates.y
                     x = x + size / 2
                     y = y + size / 2
                     local cellX = floorDiv(x, size)
@@ -128,6 +132,15 @@ data:extend{
             "autoplace-control-description.island-randomness"
         }
     }, {
+        type = "autoplace-control",
+        name = "map-rotation",
+        richness = false,
+        order = "d-a",
+        category = "terrain",
+        localised_description = {
+            "autoplace-control-description.map-rotation"
+        }
+    }, {
         type = "noise-expression",
         name = "control-setting:island-randomness:frequency:multiplier",
         expression = noise.to_noise_expression(1)
@@ -135,6 +148,14 @@ data:extend{
         type = "noise-expression",
         name = "control-setting:island-randomness:bias",
         expression = noise.to_noise_expression(0)
+    }, {
+        type = "noise-expression",
+        name = "control-setting:map-rotation:frequency:multiplier",
+        expression = noise.to_noise_expression(1 / 6)
+    }, {
+        type = "noise-expression",
+        name = "control-setting:map-rotation:bias",
+        expression = noise.to_noise_expression(-1)
     }, {
         type = "noise-expression",
         name = "fractured-world-concentric-circles",
@@ -159,6 +180,9 @@ data:extend{
         name = "fractured-world-cartesian-value",
         intended_property = "moisture",
         expression = noise.define_noise_function(function(x, y, tile, map)
+            local rotatedCoordinates = functions.rotate_map()
+            x = rotatedCoordinates.x
+            y = rotatedCoordinates.y
             x = x + size / 2
             y = y + size / 2
             return functions.get_random_point(floorDiv(x, size), floorDiv(y, size), functions.size)
@@ -169,6 +193,10 @@ data:extend{
         name = "fractured-world-chessboard-distance",
         intended_property = "fw_distance",
         expression = noise.define_noise_function(function(x, y, tile, map)
+            local rotatedCoordinates = functions.rotate_map()
+            x = rotatedCoordinates.x
+            y = rotatedCoordinates.y
+
             local distanceToOrigin = functions.distance(x, y, "chessboard")
             local starting_factor = noise.clamp((distanceToOrigin - size) * math.huge, -1, 1)
             x = modulo(x + size / 2, size) - size / 2
@@ -245,6 +273,11 @@ data:extend{
         name = "fw_default_size",
         intended_property = "fw_default_size",
         expression = tne(settings.startup["fractured-world-default-cell-size"].value)
+    }, {
+        type = "noise-expression",
+        name = "fw_half_default_size",
+        intended_property = "fw_default_size",
+        expression = tne(settings.startup["fractured-world-default-cell-size"].value / 2)
     }
 }
 

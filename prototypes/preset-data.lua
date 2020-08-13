@@ -1,14 +1,10 @@
 local fnp = require("prototypes.fractured-noise-programs")
 return {
     ["default"] = {
-        presetDefaults = {
-            frequency = 1,
-            size = 1,
-            water = 0.5
-        },
+        presetDefaults = {size = 1, water = 1 / 3},
         voronoi = {
             class = "two-point",
-            waterInfluence = 3
+            waterOffset = 125
             -- waterOffset = math.log(1 / 6, 2)
         }
     },
@@ -25,37 +21,38 @@ return {
         }
     },
     ["hexagons"] = {
-        presetDefaults = {
-            frequency = 6,
-            size = 3 / 4,
-            water = 1 / 4
-        },
+        presetDefaults = {frequency = 6, size = 3 / 4},
         voronoi = {
-            class = "two-point",
+            -- class = "two-point",
             pointType = "hexagon",
-            waterInfluence = 3,
-            aspectRatio = math.sqrt(3 / 4),
-            waterOffset = 100,
+            distanceType = "hexagonal",
+            aspectRatio = math.sqrt(3) / 2,
+            waterInfluence = 2.5,
             offsetFactor = 0
         }
     },
     ["spiral"] = {
-        defaultSize = 64,
+        defaultSize = "fw_half_default_size",
         presetDefaults = {frequency = 6},
         cartesian = fnp.on_spiral
     },
     ["waves"] = {
-        defaultSize = 64,
+        defaultSize = "fw_half_default_size",
         presetDefaults = {frequency = 6, size = 6},
         cartesian = fnp.waves
     },
     ["random-squares"] = {
-        defaultSize = 64,
+        defaultSize = "fw_half_default_size",
         presetDefaults = {frequency = 6},
         cartesian = fnp.is_random_square
     },
     ["polytopic"] = {
-        defaultSize = 64,
+        defaultSize = "fw_half_default_size",
         cartesian = fnp.is_polytopic_square
+    },
+    ["trellis"] = {
+        defaultSize = "fw_half_default_size",
+        rotation = {0, 1},
+        cartesian = fnp.is_trellis_square
     }
 }

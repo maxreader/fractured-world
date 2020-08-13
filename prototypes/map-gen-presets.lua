@@ -33,8 +33,8 @@ local function make_preset(name, args)
         moisture = "fractured-world-cartesian-value"
         fw_distance = "fractured-world-chessboard-distance"
     end
-    local defaultSize = "fw_default_size"
-    if args.defaultSize then defaultSize = "fw_default_size_" .. name end
+    local defaultSize = args.defaultSize or "fw_default_size"
+    local mapRotation = args.rotation or {6, 1 / 6}
 
     mgp["fractured-world-" .. name] = {
         order = "h-" .. count,
@@ -52,6 +52,10 @@ local function make_preset(name, args)
                 ["island-randomness"] = {
                     frequency = frequency,
                     size = size
+                },
+                ["map-rotation"] = {
+                    frequency = mapRotation[1],
+                    size = mapRotation[2]
                 }
             },
             water = water
