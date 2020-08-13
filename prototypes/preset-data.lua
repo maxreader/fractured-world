@@ -1,7 +1,11 @@
 local fnp = require("prototypes.fractured-noise-programs")
 return {
     ["default"] = {
-        presetDefaults = {size = 1, water = 0.5},
+        presetDefaults = {
+            frequency = 1,
+            size = 1,
+            water = 0.5
+        },
         voronoi = {
             class = "two-point",
             waterInfluence = 3
@@ -50,8 +54,8 @@ return {
         presetDefaults = {frequency = 6},
         cartesian = fnp.is_random_square
     },
-    ["maze"] = {
+    ["polytopic"] = {
         defaultSize = 64,
-        cartesian = fnp.is_maze_square
+        cartesian = fnp.is_polytopic_square
     }
 }
