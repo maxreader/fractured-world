@@ -6,10 +6,13 @@
 -- randProb
 return {
     base = {
-        ["iron-ore"] = {density = 10},
-        ["copper-ore"] = {density = 8},
-        ["coal"] = {density = 8},
-        ["stone"] = {density = 4},
+        ["iron-ore"] = {density = 10, starting_radius = 1.5},
+        ["copper-ore"] = {
+            density = 8,
+            starting_radius = 1.2
+        },
+        ["coal"] = {density = 8, starting_radius = 1.1},
+        ["stone"] = {density = 4, starting_radius = 1.1},
         ["uranium-ore"] = {
             density = 0.9,
             frequency = 1.25,
@@ -51,7 +54,7 @@ return {
             randmin = 2,
             randmax = 4
         },
-        ["tin-ore"] = {density = 8},
+        ["tin-ore"] = {density = 8, starting_radius = 1.2},
         ["tungsten-ore"] = {density = 8},
         ["zinc-ore"] = {density = 4}
 
@@ -65,13 +68,29 @@ return {
             addRich = 2500,
             randProb = 1 / 48
         },
-        ["angels-ore1"] = {density = 10},
-        ["angels-ore2"] = {density = 7},
+        ["angels-ore1"] = {
+            density = 10,
+            starting_radius = 1.5
+        },
+        ["angels-ore2"] = {
+            density = 7,
+            starting_radius = 1.1
+        },
         ["angels-ore3"] = {density = 10},
-        ["angels-ore4"] = {density = 7},
-        ["angels-ore5"] = {density = 8},
-        ["angels-ore6"] = {density = 8},
-        ["coal"] = {density = 8},
+        starting_radius = 1.5,
+        ["angels-ore4"] = {
+            density = 7,
+            starting_radius = 1.1
+        },
+        ["angels-ore5"] = {
+            density = 8,
+            starting_radius = 1.2
+        },
+        ["angels-ore6"] = {
+            density = 8,
+            starting_radius = 1.2
+        },
+        ["coal"] = {density = 8, starting_radius = 1.1},
         ["crude-oil"] = {
             density = 8,
             frequency = 1.8,
@@ -124,14 +143,23 @@ return {
         }
     },
     DyWorld = {
-        ["stone"] = {density = 24},
-        ["coal"] = {density = 12},
-        ["iron-ore"] = {density = 15},
-        ["copper-ore"] = {density = 13},
-        ["nickel-ore"] = {density = 12},
-        ["silver-ore"] = {density = 8},
-        ["tin-ore"] = {density = 9},
-        ["gold-ore"] = {density = 5},
+        ["stone"] = {density = 24, starting_radius = 1.35},
+        ["coal"] = {density = 12, starting_radius = 1.25},
+        ["iron-ore"] = {density = 15, starting_radius = 1.5},
+        ["copper-ore"] = {
+            density = 13,
+            starting_radius = 1.45
+        },
+        ["nickel-ore"] = {
+            density = 12,
+            starting_radius = 1.32
+        },
+        ["silver-ore"] = {
+            density = 8,
+            starting_radius = 1.2
+        },
+        ["tin-ore"] = {density = 9, starting_radius = 1.27},
+        ["gold-ore"] = {density = 5, starting_radius = 1.41},
         ["lead-ore"] = {density = 12},
         ["cobalt-ore"] = {density = 10},
         ["arditium-ore"] = {density = 15},
