@@ -9,7 +9,7 @@ local fw_settings = {
         type = "double-setting",
         name = "fractured-world-overall-resource-frequency",
         setting_type = "startup",
-        default_value = 0.0625,
+        default_value = 0.02,
         minimum_value = 0,
         maximum_value = 1
     }, {
