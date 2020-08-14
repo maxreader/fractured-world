@@ -11,6 +11,7 @@ local size = functions.size
 local floorDiv = functions.floorDiv
 local modulo = functions.modulo
 local distance = functions.distance
+local count_to_order = functions.count_to_order
 
 --[[
     Defaults to add as settings
@@ -24,6 +25,7 @@ if mods["alien-biomes"] then
     temperatureFloor = -20
 end
 
+local count = 0
 local function make_voronoi_preset(name, presetData)
     local args = presetData.voronoi or {}
     local class = args.class or "one-point"
@@ -73,23 +75,24 @@ local function make_voronoi_preset(name, presetData)
         {
             type = "noise-expression",
             name = "fractured-world-" .. name,
-            order = "4000",
+            order = "40" + count_to_order(count),
             intended_property = "elevation",
             expression = elevation
         }, {
             type = "noise-expression",
             name = "fractured-world-value-" .. name,
-            order = "4000",
+            order = "40" + count_to_order(count),
             intended_property = "moisture",
             expression = value
         }, {
             type = "noise-expression",
             name = "fractured-world-point-distance-" .. name,
-            order = "4000",
+            order = "40" + count_to_order(count),
             intended_property = "fw_distance",
             expression = pointDistance
         }
     }
+    count = count + 1
 end
 
 local function make_cartesian_preset(name, args)
@@ -99,7 +102,7 @@ local function make_cartesian_preset(name, args)
             type = "noise-expression",
             name = "fractured-world-" .. name,
             intended_property = "elevation",
-            order = "4000",
+            order = "40" + count_to_order(count),
             expression = noise.define_noise_function(
                 function(x, y, tile, map)
                     local rotatedCoordinates = functions.rotate_map()
@@ -113,13 +116,14 @@ local function make_cartesian_preset(name, args)
                     local localY = noise.absolute_value(modulo(y, size) - size / 2) - 1
                     local height = size / 2 - distance(localX, localY, "chessboard")
                     local isOrigin = 1 -
-                                         noise.max(1, noise.absolute_value(cellX) +
+                                         noise.min(1, noise.absolute_value(cellX) +
                                                        noise.absolute_value(cellY))
-                    return noise.max(generating_function(cellX, cellY), isOrigin) * height * -2 +
-                               height - 1
+                    return generating_function(cellX, cellY) * height * -2 + height - 1 + isOrigin *
+                               size / 2
                 end)
         }
     }
+    count = count + 1
 end
 data:extend{
     {
@@ -257,13 +261,13 @@ data:extend{
                 octave_input_scale_multiplier = tne(0.8)
             }
         }
-    }, {
+    }, --[[{
         type = "noise-expression",
         name = "ridges",
         order = "4000",
         intended_property = "elevation",
         expression = (fnp.make_ridges(4, 10, 0.5, 0.5) * 100 - 50)
-    }, {
+    }, ]] {
         type = "noise-expression",
         name = "fw_distance",
         intended_property = "fw_distance",
