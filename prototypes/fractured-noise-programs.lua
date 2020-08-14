@@ -132,10 +132,14 @@ local function get_point_data(x, y, args)
             local relativeY = width * v * factor + point_y - lY - 0.001
             relativeX = relativeX / aspectRatio
 
+            local pDistance = distance(relativeX, relativeY, args.distanceType)
+            local angle = noise.atan2(relativeY, relativeX) + 2 * math.pi
+            local value = point.val
+
             -- add data for this point to tables
-            distances[count] = distance(relativeX, relativeY, args.distanceType)
-            angles[count] = noise.atan2(relativeY, relativeX) + 2 * math.pi
-            values[count] = point.val
+            distances[count] = pDistance
+            angles[count] = angle
+            values[count] = value
 
             count = count + 1
         end
@@ -172,6 +176,15 @@ local function get_closest_point_and_value(x, y, args)
     -- Choose the remaining value and angle
     local value = get_extremum("max", values)
     local angle = get_extremum("max", angles)
+
+    -- adjust the distance, if necessary
+    if args.distanceAdjustment == "gear" then
+        angle = angle + value * 2 * math.pi
+        local toothNumber = 8
+        local isTooth = noise.sin(toothNumber * angle)
+        minDistance = noise.max(
+                          minDistance * (1 + 0.35 * functions.smooth_step(isTooth, -0.5, 0.8)), 0)
+    end
     return {
         distance = minDistance,
         angle = angle,
@@ -271,7 +284,7 @@ local startingAreaOuterRadius = 3 * defaultSize
 
 local function create_voronoi_starting_area(elevation, value, pointDistance, args)
     local smallNoise = noise.var("fw-large-noise") * small_noise_factor / 15
-    args.size = startingAreaOuterRadius
+    args.size = startingAreaOuterRadius * 0.8
     local offset = args.size / 2 * (args.offsetFactor or 1)
     local rotatedCoordinates = functions.rotate_map()
     local x = rotatedCoordinates.x
@@ -281,6 +294,14 @@ local function create_voronoi_starting_area(elevation, value, pointDistance, arg
     local distanceForOres = distanceToOrigin
     local startingValue = functions.pseudo_random()
     local fadeOutFactor = 0.65
+
+    if args.distanceAdjustment == "gear" then
+        local angle = noise.atan2(y, x) + 2 * math.pi + startingValue * 2 * math.pi
+        local toothNumber = 8
+        local isTooth = noise.sin(toothNumber * angle)
+        scaledDistance = noise.max(scaledDistance *
+                                       (1 + 0.35 * functions.smooth_step(isTooth, -0.5, 0.8)), 0)
+    end
     x = x + offset
     y = y + offset
 
@@ -295,6 +316,8 @@ local function create_voronoi_starting_area(elevation, value, pointDistance, arg
 
         scaledDistance = ((distanceToOrigin - point.distance) / startingAreaOuterRadius + 1) *
                              startingAreaOuterRadius / 2
+    else
+        scaledDistance = scaledDistance / 1.5
     end
 
     local starting_factor = (defaultSize / scaledDistance - fadeOutFactor) / (1 - fadeOutFactor)

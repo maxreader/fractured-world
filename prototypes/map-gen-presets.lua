@@ -1,5 +1,5 @@
 local mgp = data.raw["map-gen-presets"].default
-local noise = require("noise")
+local functions = require("prototypes.functions")
 
 --[[data:extend{
     {
@@ -20,11 +20,13 @@ mgp["fw-debug"] = {
     }
 } -- ]]
 
+local count_to_order = functions.count_to_order
+
 local count = 0
 local function make_preset(name, args)
     local presetDefaults = args.presetDefaults or {}
     local frequency = (presetDefaults.frequency) or (1 / 6)
-    local size = presetDefaults.size or 3
+    local size = presetDefaults.size or 1
     local water = presetDefaults.water or 1
     local elevation = "fractured-world-" .. name
     local fw_distance = "fractured-world-point-distance-" .. name
@@ -37,7 +39,7 @@ local function make_preset(name, args)
     local mapRotation = args.rotation or {6, 1 / 6}
 
     mgp["fractured-world-" .. name] = {
-        order = "h-" .. count,
+        order = "h-" .. count_to_order(count),
         basic_settings = {
             property_expression_names = {
                 elevation = elevation,

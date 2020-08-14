@@ -8,8 +8,15 @@ return {
             -- waterOffset = math.log(1 / 6, 2)
         }
     },
+    ["gears"] = {
+        presetDefaults = {size = 0.5},
+        voronoi = {distanceAdjustment = "gear"}
+    },
     ["circles"] = {},
-    ["squares"] = {voronoi = {distanceType = "chessboard"}},
+    ["squares"] = {
+        presetDefaults = {frequency = 6},
+        voronoi = {distanceType = "chessboard"}
+    },
     ["diamonds"] = {
         voronoi = {distanceType = "rectilinear"}
     },
@@ -19,18 +26,18 @@ return {
             distanceType = "chessboard",
             pointType = "brick"
         }
-    },
+    }, --[[
     ["hexagons"] = {
         presetDefaults = {frequency = 6, size = 3 / 4},
         voronoi = {
             -- class = "two-point",
             pointType = "hexagon",
             distanceType = "hexagonal",
-            aspectRatio = math.sqrt(3) / 2,
+            aspectRatio = 1, -- math.sqrt(3) / 2,
             waterInfluence = 2.5,
             offsetFactor = 0
         }
-    },
+    },]]
     ["spiral"] = {
         defaultSize = "fw_half_default_size",
         presetDefaults = {frequency = 6},
@@ -41,6 +48,11 @@ return {
         presetDefaults = {frequency = 6, size = 6},
         cartesian = fnp.waves
     },
+    ["trellis"] = {
+        defaultSize = "fw_half_default_size",
+        rotation = {1, 2},
+        cartesian = fnp.is_trellis_square
+    },
     ["random-squares"] = {
         defaultSize = "fw_half_default_size",
         presetDefaults = {frequency = 6},
@@ -48,11 +60,7 @@ return {
     },
     ["polytopic"] = {
         defaultSize = "fw_half_default_size",
+        presetDefaults = {frequency = 2 / 3},
         cartesian = fnp.is_polytopic_square
-    },
-    ["trellis"] = {
-        defaultSize = "fw_half_default_size",
-        rotation = {0, 1},
-        cartesian = fnp.is_trellis_square
     }
 }

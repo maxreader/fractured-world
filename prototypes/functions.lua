@@ -161,6 +161,13 @@ end
 -- It also returns the random value, so that the random value generator
 -- does not need to be called multiple times
 
+local function count_to_order(count)
+    if count < 10 then
+        return "0" .. tostring(count)
+    else
+        return tostring(count)
+    end
+end
 local random_offset_factor = slider_to_scale(
                                  "control-setting:island-randomness:frequency:multiplier")
 local size = noise.var("fw_default_size") / noise.var("segmentation_multiplier")
@@ -183,6 +190,7 @@ return {
     sharp_step = sharp_step,
     pseudo_random = pseudo_random,
     get_random_point = get_random_point,
+    count_to_order = count_to_order,
     rof = random_offset_factor,
     size = size
 }
