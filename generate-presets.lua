@@ -8,7 +8,7 @@ local make_preset = require("prototypes.map-gen-presets")
 local function make_world(name, args)
     if args.cartesian then
         make_cartesian_preset(name, args)
-    else
+    elseif not args.special then
         make_voronoi_preset(name, args)
     end
     make_preset(name, args)
