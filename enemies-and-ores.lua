@@ -47,9 +47,6 @@ for ore, _ in pairs(infiniteOreData) do
     fw_property_expressions["entity:" .. ore .. ":richness"] = richName
 end
 
---[[local overhaulBiters = (not mods["angelsrefining"]) or mods["angelsexploration"] or
-                           settings.startup["angels-enable-biters"].value]]
-
 for _, enemyType in pairs(enemyData) do
     for name, v in pairs(enemyType) do
         if v.probability_expression then

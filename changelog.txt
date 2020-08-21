@@ -2,5 +2,11 @@
 Version: 1.0.1
 Date: ????
   Changes:
+---------------------------------------------------------------------------------------------------
+Version: 1.0.0
+Date: 2020-08-21
+  Changes:
     - Added infinite coastline preset
     - Moved mod to data-final-fixes to improve load times
+  Bugfixes:
+    - Fixed incorrect mod description
