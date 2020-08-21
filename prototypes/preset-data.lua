@@ -62,5 +62,8 @@ return {
         defaultSize = "fw_half_default_size",
         presetDefaults = {frequency = 2 / 3},
         cartesian = fnp.is_polytopic_square
+    },
+    ["infinite-coastline"] = {
+        special = "infinite-coastline"
     }
 }

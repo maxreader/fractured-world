@@ -282,6 +282,14 @@ data:extend{
         name = "fw_half_default_size",
         intended_property = "fw_default_size",
         expression = tne(settings.startup["fractured-world-default-cell-size"].value / 2)
+    }, {
+        type = "noise-expression",
+        name = "fw_rotated_x",
+        expression = tne(functions.rotate_map().x)
+    }, {
+        type = "noise-expression",
+        name = "fw_rotated_y",
+        expression = tne(functions.rotate_map().y)
     }
 }
 

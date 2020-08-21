@@ -21,9 +21,33 @@ mgp["fw-debug"] = {
 } -- ]]
 
 local count_to_order = functions.count_to_order
+local function make_special_preset(name, args, count)
+    local mapRotation = args.rotation or {6, 1 / 6}
+    if name == "infinite-coastline" then
+        mgp["special-fractured-world-" .. name] = {
+            order = "h-" .. count_to_order(count),
+            basic_settings = {
+                property_expression_names = {
+                    elevation = "fw_rotated_x"
+                },
+                autoplace_controls = {
+                    ["map-rotation"] = {
+                        frequency = mapRotation[1],
+                        size = mapRotation[2]
+                    }
+                }
+            }
+        }
+    end
+end
 
 local count = 0
 local function make_preset(name, args)
+    if args.special then
+        make_special_preset(name, args, count)
+        count = count + 1
+        return
+    end
     local presetDefaults = args.presetDefaults or {}
     local frequency = (presetDefaults.frequency) or (1 / 6)
     local size = presetDefaults.size or 1
