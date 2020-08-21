@@ -5,8 +5,6 @@ local make_cartesian_preset = fne.make_cartesian_preset
 local make_voronoi_preset = fne.make_voronoi_preset
 local make_preset = require("prototypes.map-gen-presets")
 
-local default_sizes = {"default", "half"}
-
 local function make_world(name, args)
     if args.cartesian then
         make_cartesian_preset(name, args)

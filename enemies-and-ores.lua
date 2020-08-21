@@ -1,4 +1,5 @@
 local noise = require("noise")
+local presetData = require('prototypes.preset-data')
 local enemyData = require("prototypes.enemies")
 local ores = require("prototypes.ores")
 local get_probability = ores.get_probability
@@ -66,7 +67,7 @@ for _, enemyType in pairs(enemyData) do
 end
 
 for name, preset in pairs(data.raw["map-gen-presets"].default) do
-    if string.match(name, "fractured%-world") then
+    if string.match(name, "^fractured%-world") then
         for k, v in pairs(fw_property_expressions) do
             preset.basic_settings.property_expression_names[k] = v
         end
