@@ -5,18 +5,18 @@
     "author": "Maxreader",
     "contact": "",
     "homepage": "",
-    "factorio_version": "0.18",
+    "factorio_version": "1.0",
     "dependencies": [
         "base >= 0.17"
     ],
     "description": "Shatters Factorio terrain generation and rebuilds it from the ground up.\nEnclosed are many wacky map presets to spice up gameplay.",
     "package": {
         "ignore": [
-            "previews/",
+            "previews/**",
             "hilbert-wip.lua",
             ".gitattributes",
             ".gitignore",
-            ".vscode/"
+            ".vscode/**"
         ]
     }
 }
