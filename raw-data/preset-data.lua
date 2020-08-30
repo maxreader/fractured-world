@@ -1,5 +1,4 @@
-local fnp = require("prototypes.fractured-noise-programs")
-return {
+local presets = {
     ["default"] = {
         presetDefaults = {size = 1, water = 1 / 3},
         voronoi = {
@@ -10,7 +9,7 @@ return {
     },
     ["gears"] = {
         presetDefaults = {size = 0.5},
-        voronoi = {distanceAdjustment = "gear"}
+        voronoi = {distanceModifier = "gear"}
     },
     ["circles"] = {},
     ["squares"] = {
@@ -26,44 +25,49 @@ return {
             distanceType = "chessboard",
             pointType = "brick"
         }
-    }, --[[
+    },
     ["hexagons"] = {
         presetDefaults = {frequency = 6, size = 3 / 4},
         voronoi = {
-            -- class = "two-point",
             pointType = "hexagon",
-            distanceType = "hexagonal",
-            aspectRatio = 1, -- math.sqrt(3) / 2,
+            aspectRatio = math.sqrt(3) / 2,
             waterInfluence = 2.5,
-            offsetFactor = 0
+            offsetFactor = 0,
+            distanceModifier = "hexagon"
         }
-    },]]
+    },
+    ["flowers"] = {
+        presetDefaults = {size = 0.5},
+        voronoi = {distanceModifier = "flower"}
+    },
     ["spiral"] = {
         defaultSize = "fw_half_default_size",
         presetDefaults = {frequency = 6},
-        cartesian = fnp.on_spiral
+        cartesian = "on_spiral"
     },
     ["waves"] = {
         defaultSize = "fw_half_default_size",
         presetDefaults = {frequency = 6, size = 6},
-        cartesian = fnp.waves
+        cartesian = "waves"
     },
     ["trellis"] = {
         defaultSize = "fw_half_default_size",
         rotation = {1, 2},
-        cartesian = fnp.is_trellis_square
+        cartesian = "is_trellis_square"
     },
     ["random-squares"] = {
         defaultSize = "fw_half_default_size",
         presetDefaults = {frequency = 6},
-        cartesian = fnp.is_random_square
+        cartesian = "is_random_square"
     },
     ["polytopic"] = {
         defaultSize = "fw_half_default_size",
         presetDefaults = {frequency = 2 / 3},
-        cartesian = fnp.is_polytopic_square
+        cartesian = "is_polytopic_square"
     },
     ["infinite-coastline"] = {
         special = "infinite-coastline"
     }
 }
+
+for k, v in pairs(presets) do fractured_world.add_preset(k, v) end

@@ -4,7 +4,7 @@
 -- randmax default = 2
 -- add-richness
 -- randProb
-return {
+local rawResourceData = {
     base = {
         ["iron-ore"] = {density = 10, starting_radius = 1.5},
         ["copper-ore"] = {
@@ -168,3 +168,4 @@ return {
         ["neutronium-ore"] = {density = 25}
     }
 }
+for k, v in pairs(rawResourceData) do fractured_world.add_resource_data(k, v) end

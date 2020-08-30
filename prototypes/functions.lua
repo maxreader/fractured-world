@@ -99,10 +99,6 @@ local function distance(x, y, metric)
         return x + y
     elseif metric == "chessboard" then
         return noise.max(x, y)
-    elseif metric == "hexagonal" then
-        local x1 = 1 / 2
-        local y1 = math.sqrt(3) / 2
-        return noise.max(dot({x, y}, {x1, y1}), x)
     else
         return error("metric: " .. metric .. ", is not a valid distance metric")
     end

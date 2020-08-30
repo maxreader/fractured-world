@@ -1,81 +1,15 @@
 local noise = require("noise")
 local tne = noise.to_noise_expression
+local pi = tne(math.pi)
 local functions = require("prototypes.functions")
 local floorDiv = functions.floorDiv
 local modulo = functions.modulo
 local greater_than = functions.greater_than
-local rof = functions.rof
-local get_random_point = functions.get_random_point
 local distance = functions.distance
 local get_extremum = functions.get_extremum
 local small_noise_factor = noise.get_control_setting("island-randomness").size_multiplier
-local ssnf = functions.slider_to_scale("control-setting:island-randomness:size:multiplier")
 local waterLevel = -(noise.var("wlc_elevation_offset"))
 local landDensity = noise.delimit_procedure(75.17 * waterLevel ^ 2 - 18503 * waterLevel + 451000)
--- TODO: Create functions to make starting areas. First, make single island map type, then transition between the two
-
-local function waves(x, y)
-    y = y - 1
-    x = modulo(x, 4) * (1 - ssnf) + modulo(y, 4) * ssnf
-    y = modulo(y, 4) * (1 - ssnf) + modulo(x, 4) * ssnf
-    return 1 - noise.clamp(greater_than(y, 0) - modulo(x, 2) * (1 - noise.equals(y, x)), 0, 1)
-end
-
-local function get_brick_point(x, y, width)
-    local val = get_random_point(x, y, width).val
-    local oddY = modulo(y, 2)
-    local oddX = modulo(x, 2)
-    local scale = rof * 2
-    local xShift = 1 - noise.clamp(scale, 0, 1)
-    local yShift = noise.clamp(scale, 1, 2) - 1
-    x = width * oddY / 2 * xShift
-    y = width * oddX / 2 * yShift
-    return {x = x, y = y, val = val}
-end
-
-local function get_hexagon_point(x, y, width)
-    local randPoint = get_random_point(x, y, width)
-    local val = randPoint.val
-    local oddY = modulo(y, 2)
-    x = width * oddY / 2
-    y = y * (1 - rof) + rof * randPoint.y
-    x = x * (1 - rof) + rof * randPoint.x
-    return {x = x, y = y, val = val}
-end
-
-local function on_spiral(x, y)
-    local isYNegative = -noise.clamp(y, -1, 0)
-    local specialFactor = (noise.clamp(noise.absolute_value(y - x) * math.huge, 0, 1) - 1) *
-                              isYNegative
-    return modulo(distance(x, y - isYNegative, "chessboard") + specialFactor, 2)
-end
-
-local function get_coverage_for_random()
-    return noise.var("wlc_elevation_offset") * 0.9 / 20 / noise.log2(6) + 0.55
-end
-
-local function is_random_square(x, y)
-    local value = functions.pseudo_random(x, y)
-    value = modulo(value * 13)
-    local probability = get_coverage_for_random()
-    return (greater_than(value, probability))
-end
-
-local function is_polytopic_square(x, y)
-    local maxNeighbors = floorDiv((1 - rof) * 8)
-    local cellsToBeBorn = floorDiv(ssnf * 8)
-    local neighbors = 0
-    for v = -1, 1 do for u = -1, 1 do neighbors = neighbors + is_random_square(x + v, y + u) end end
-    neighbors = neighbors - is_random_square(x, y)
-    local alive = noise.less_than(neighbors, maxNeighbors)
-    return noise.max(alive, noise.equals(cellsToBeBorn, neighbors))
-end
-
-local function is_trellis_square(x, y)
-    x = modulo(x, 2)
-    y = modulo(y, 2)
-    return noise.min(x, y)
-end
 
 local function get_point_data(x, y, args)
     local width = args.size or 128
@@ -109,32 +43,22 @@ local function get_point_data(x, y, args)
                 factor = 1 + modulo(u + v, 2) * (math.sqrt(2) - 1)
             end
 
-            local point
-            local point_x
-            local point_y
-            if pointType == "random" then
-                point = get_random_point(s, t, width)
-                point_x = point.x * rof + width / 2 * (1 - rof)
-                point_y = point.y * rof + width / 2 * (1 - rof)
-            elseif pointType == "brick" then
-                point = get_brick_point(s, t, width)
-                point_x = point.x
-                point_y = point.y
-            elseif pointType == "hexagon" then
-                point = get_hexagon_point(s, t, width)
-                point_x = point.x
-                point_y = point.y
-            end
+            local point = fractured_world.point_types[pointType](s, t, width)
 
             -- subtracting a small amount to break ties when comparing otherwise equal distances
             -- putting coordinates into "local" coordinates
-            local relativeX = width * u * factor + point_x - lX - 0.001
-            local relativeY = width * v * factor + point_y - lY - 0.001
+            local relativeX = width * u * factor + point.x - lX - 0.001
+            local relativeY = width * v * factor + point.y - lY - 0.001
             relativeX = relativeX / aspectRatio
 
             local pDistance = distance(relativeX, relativeY, args.distanceType)
             local angle = noise.atan2(relativeY, relativeX) + 2 * math.pi
             local value = point.val
+
+            if args.distanceModifier then
+                pDistance = fractured_world.distance_modifiers[args.distanceModifier](pDistance,
+                                                                                      angle, value)
+            end
 
             -- add data for this point to tables
             distances[count] = pDistance
@@ -178,13 +102,10 @@ local function get_closest_point_and_value(x, y, args)
     local angle = get_extremum("max", angles)
 
     -- adjust the distance, if necessary
-    if args.distanceAdjustment == "gear" then
-        angle = angle + value * 2 * math.pi
-        local toothNumber = 8
-        local isTooth = noise.sin(toothNumber * angle)
-        minDistance = noise.max(
-                          minDistance * (1 + 0.35 * functions.smooth_step(isTooth, -0.5, 0.8)), 0)
-    end
+    --[[if args.distanceModifier then
+        minDistance = distanceModifiers[args.distanceModifier](minDistance, angle, value)
+    end]]
+
     return {
         distance = minDistance,
         angle = angle,
@@ -192,7 +113,7 @@ local function get_closest_point_and_value(x, y, args)
     }
 end
 
--- Used for more complex presets that need the two closest points: Default, Hexagon
+-- Used for more complex presets that need the two closest points: Default
 local function get_closest_two_points(x, y, args)
     -- Get all pointData for adjacent cells
     local pointData = get_point_data(x, y, args)
@@ -295,13 +216,13 @@ local function create_voronoi_starting_area(elevation, value, pointDistance, arg
     local startingValue = functions.pseudo_random()
     local fadeOutFactor = 0.65
 
-    if args.distanceAdjustment == "gear" then
-        local angle = noise.atan2(y, x) + 2 * math.pi + startingValue * 2 * math.pi
-        local toothNumber = 8
-        local isTooth = noise.sin(toothNumber * angle)
-        scaledDistance = noise.max(scaledDistance *
-                                       (1 + 0.35 * functions.smooth_step(isTooth, -0.5, 0.8)), 0)
+    if args.distanceModifier then
+        local angle = noise.atan2(y, x) + 2 * math.pi
+        scaledDistance = fractured_world.distance_modifiers[args.distanceModifier](scaledDistance,
+                                                                                   angle,
+                                                                                   startingValue)
     end
+
     x = x + offset
     y = y + offset
 
@@ -336,9 +257,11 @@ local function create_voronoi_starting_area(elevation, value, pointDistance, arg
     local finalValue = value * regular_factor + startingValue * (1 - regular_factor)
     local finalPointDistance = pointDistance * regular_factor + distanceForOres *
                                    (regular_factor - 1)
+
     --[[local starting_area_factor = functions.sharp_step(-scaledDistance, -1, -1.5)
     local everything_else_factor = functions.sharp_step(scaledDistance, 1.5, 2)
     return (10 * (starting_area_factor) + elevation * everything_else_factor)--]]
+
     return {
         elevation = finalElevation,
         value = finalValue,
@@ -375,11 +298,6 @@ local function make_ridges(octaves, baseAmplitude, persistence, amplitudeScaling
 end -- ]]
 
 return {
-    waves = waves,
-    on_spiral = on_spiral,
-    is_random_square = is_random_square,
-    is_polytopic_square = is_polytopic_square,
-    is_trellis_square = is_trellis_square,
     get_closest_point_and_value = get_closest_point_and_value,
     get_closest_two_points = get_closest_two_points,
     is_bridge = is_bridge,

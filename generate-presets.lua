@@ -1,5 +1,3 @@
-local tne = require("noise").to_noise_expression
-local preset_data = require('prototypes.preset-data')
 local fne = require("prototypes.fractured-noise-expressions")
 local make_cartesian_preset = fne.make_cartesian_preset
 local make_voronoi_preset = fne.make_voronoi_preset
@@ -14,4 +12,4 @@ local function make_world(name, args)
     make_preset(name, args)
 end
 
-for name, args in pairs(preset_data) do make_world(name, args) end
+for name, args in pairs(fractured_world.presets) do make_world(name, args) end

@@ -4,7 +4,6 @@ local functions = require("functions")
 local fnp = require("fractured-noise-programs")
 
 local resources = data.raw['resource']
-local rawResourceData = require("prototypes.raw-resource-data")
 
 local radius = noise.var("fw_distance")
 local scaledRadius = (radius / functions.size)
@@ -18,7 +17,7 @@ local startingPatchDefaultRadius = 15 * startingPatchScaleFactor
 
 local currentResourceData = {}
 
-for k, v in pairs(rawResourceData) do
+for k, v in pairs(fractured_world.raw_resource_data) do
     if mods[k] then
         for ore, oreData in pairs(v) do
             if resources[ore] and resources[ore].autoplace then
@@ -32,9 +31,10 @@ local starting_patches = resource_autoplace__patch_metasets.starting.patch_set_i
 local regular_patches = resource_autoplace__patch_metasets.regular.patch_set_indexes
 
 -- pick up any ores not in the raw dataset and give them a default
-for ore, index in pairs(regular_patches) do
-    if resources[ore] and resources[ore].autoplace and not currentResourceData[ore] then
-        currentResourceData[ore] = {density = 8}
+for name, ore in pairs(resources) do
+    if ore.autoplace and not currentResourceData[name] then
+        currentResourceData[name] = {density = 8}
+        if ore.map_grid == true then currentResourceData[name].randProb = 1 / 48 end
     end
 end
 

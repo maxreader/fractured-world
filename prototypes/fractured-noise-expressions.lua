@@ -95,7 +95,7 @@ local function make_voronoi_preset(name, presetData)
 end
 
 local function make_cartesian_preset(name, args)
-    local generating_function = args.cartesian
+    local generating_function = fractured_world.cartesian_fuctions[args.cartesian]
     data:extend{
         {
             type = "noise-expression",
