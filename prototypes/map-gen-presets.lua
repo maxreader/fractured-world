@@ -28,7 +28,7 @@ local function make_special_preset(name, args, count)
             order = "h-" .. count_to_order(count),
             basic_settings = {
                 property_expression_names = {
-                    elevation = "fw_rotated_x"
+                    elevation = "fractured-world-infinite-coastline"
                 },
                 autoplace_controls = {
                     ["map-rotation"] = {

@@ -5,7 +5,6 @@ local fnp = require("prototypes.fractured-noise-programs")
 local functions = require('prototypes.functions')
 local get_closest_point_and_value = fnp.get_closest_point_and_value
 local get_closest_two_points = fnp.get_closest_two_points
-local small_noise_factor = fnp.small_noise_factor
 local size = functions.size
 
 local floorDiv = functions.floorDiv
@@ -284,12 +283,21 @@ data:extend{
         expression = tne(settings.startup["fractured-world-default-cell-size"].value / 2)
     }, {
         type = "noise-expression",
+        name = "fw_quarter_default_size",
+        intended_property = "fw_default_size",
+        expression = tne(settings.startup["fractured-world-default-cell-size"].value / 4)
+    }, {
+        type = "noise-expression",
         name = "fw_rotated_x",
         expression = tne(functions.rotate_map().x)
     }, {
         type = "noise-expression",
         name = "fw_rotated_y",
         expression = tne(functions.rotate_map().y)
+    }, {
+        type = "noise-expression",
+        name = "fractured-world-infinite-coastline",
+        expression = tne(functions.rotate_map().x + 120)
     }
 }
 
