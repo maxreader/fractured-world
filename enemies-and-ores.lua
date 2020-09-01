@@ -1,5 +1,3 @@
-local noise = require("noise")
-local presetData = require('prototypes.preset-data')
 local enemyData = require("prototypes.enemies")
 local ores = require("prototypes.ores")
 local get_probability = ores.get_probability

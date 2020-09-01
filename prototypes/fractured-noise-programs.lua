@@ -1,10 +1,8 @@
 local noise = require("noise")
 local tne = noise.to_noise_expression
-local pi = tne(math.pi)
 local functions = require("prototypes.functions")
 local floorDiv = functions.floorDiv
 local modulo = functions.modulo
-local greater_than = functions.greater_than
 local distance = functions.distance
 local get_extremum = functions.get_extremum
 local small_noise_factor = noise.get_control_setting("island-randomness").size_multiplier
@@ -100,11 +98,6 @@ local function get_closest_point_and_value(x, y, args)
     -- Choose the remaining value and angle
     local value = get_extremum("max", values)
     local angle = get_extremum("max", angles)
-
-    -- adjust the distance, if necessary
-    --[[if args.distanceModifier then
-        minDistance = distanceModifiers[args.distanceModifier](minDistance, angle, value)
-    end]]
 
     return {
         distance = minDistance,

@@ -1,6 +1,5 @@
 local noise = require("noise")
 local tne = noise.to_noise_expression
-local pi = tne(math.pi)
 
 local function slider_to_scale(autoplaceControlName, range)
     range = range or 6
