@@ -25,7 +25,7 @@ if mods["alien-biomes"] then
 end
 
 local count = 0
-local function make_voronoi_preset(name, presetData)
+local function make_voronoi_noise_expressions(name, presetData)
     local args = presetData.voronoi or {}
     local class = args.class or "one-point"
     local aspectRatio = args.aspectRatio or 1
@@ -94,8 +94,8 @@ local function make_voronoi_preset(name, presetData)
     count = count + 1
 end
 
-local function make_cartesian_preset(name, args)
-    local generating_function = fractured_world.cartesian_fuctions[args.cartesian]
+local function make_cartesian_noise_expressions(name, args)
+    local generating_function = fractured_world:get_cartesian_function(args.cartesian)
     data:extend{
         {
             type = "noise-expression",
@@ -124,6 +124,8 @@ local function make_cartesian_preset(name, args)
     }
     count = count + 1
 end
+
+local elevation = noise.var("elevation")
 data:extend{
     {
         type = "autoplace-control",
@@ -298,10 +300,40 @@ data:extend{
         type = "noise-expression",
         name = "fractured-world-infinite-coastline",
         expression = tne(functions.rotate_map().x + 120)
+    }, {
+        type = "noise-expression",
+        name = "fractured-world-land-grid",
+        expression = noise.define_noise_function(function(x, y, tile, map)
+            x = noise.floor(x)
+            y = noise.floor(y)
+            local isLand = noise.clamp(noise.clamp(elevation, -1, 1) * math.huge, 0, 1)
+            x = modulo(x, 32)
+            y = modulo(y, 32)
+            local isGrid = 1 - noise.clamp(x * y, 0, 1)
+            return 1000 * (isGrid) * (isLand) - 500
+        end)
+    }, {
+        type = "noise-expression",
+        name = "fractured-world-water-grid",
+        expression = noise.define_noise_function(function(x, y, tile, map)
+            x = noise.floor(x)
+            y = noise.floor(y)
+            local isWater = noise.clamp(noise.clamp(-elevation, -1, 1) * math.huge, 0, 1)
+            x = modulo(x, 32)
+            y = modulo(y, 32)
+            local isGrid = 1 - noise.clamp(x * y, 0, 1)
+            return 10000 * isGrid * (isWater) - 500
+        end)
     }
+}
+data.raw.tile["lab-dark-1"].autoplace = {
+    probability_expression = tne(-math.huge)
+}
+data.raw.tile["deepwater-green"].autoplace = {
+    probability_expression = tne(-math.huge)
 }
 
 return {
-    make_voronoi_preset = make_voronoi_preset,
-    make_cartesian_preset = make_cartesian_preset
+    make_voronoi_noise_expressions = make_voronoi_noise_expressions,
+    make_cartesian_noise_expressions = make_cartesian_noise_expressions
 }

@@ -31,4 +31,4 @@ local distanceModifiers = {
     ["hexagon"] = make_hexagon,
     ["flower"] = make_flower
 }
-for k, v in pairs(distanceModifiers) do fractured_world.add_distance_modifier(k, v) end
+for k, v in pairs(distanceModifiers) do fractured_world:add_distance_modifier(k, v) end

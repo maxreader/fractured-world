@@ -54,4 +54,4 @@ local cartesianFunctions = {
     ["is_polytopic_square"] = is_polytopic_square,
     ["is_trellis_square"] = is_trellis_square
 }
-for k, v in pairs(cartesianFunctions) do fractured_world.add_cartesian_function(k, v) end
+for k, v in pairs(cartesianFunctions) do fractured_world:add_cartesian_function(k, v) end

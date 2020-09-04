@@ -1,2 +1,3 @@
-require('generate-presets')
 require('enemies-and-ores')
+require("prototypes.map-gen-presets")
+

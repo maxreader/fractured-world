@@ -142,7 +142,7 @@ local rawResourceData = {
         ["infinite-angels-ore6"] = {base_density = 5}
     },
     Krastorio2 = {
-        ["immersite"] = {
+        ["imersite"] = {
             base_density = 1,
             base_spots_per_km2 = 0.2,
             random_spot_size_minimum = 0.01,
@@ -304,7 +304,7 @@ local rawResourceData = {
         ["tar-patch"] = {random_probability = pyRockFreq}
     }
 }
-for k, v in pairs(rawResourceData) do fractured_world.set_resource_data_data(k, v) end
+for k, v in pairs(rawResourceData) do if mods[k] then fractured_world:set_resource_data(k, v) end end
 
 --[[
 coverage = 0.004 -> base_spots_per_km2 = 2.5

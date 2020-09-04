@@ -40,4 +40,4 @@ local pointTypes = {
     ["brick"] = get_brick_point,
     ["hexagon"] = get_hexagon_point
 }
-for k, v in pairs(pointTypes) do fractured_world.add_point_type(k, v) end
+for k, v in pairs(pointTypes) do fractured_world:add_point_type(k, v) end

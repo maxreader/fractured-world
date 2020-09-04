@@ -41,7 +41,7 @@ local function get_point_data(x, y, args)
                 factor = 1 + modulo(u + v, 2) * (math.sqrt(2) - 1)
             end
 
-            local point = fractured_world.point_types[pointType](s, t, width)
+            local point = fractured_world:get_point_type(pointType)(s, t, width)
 
             -- subtracting a small amount to break ties when comparing otherwise equal distances
             -- putting coordinates into "local" coordinates
@@ -54,8 +54,9 @@ local function get_point_data(x, y, args)
             local value = point.val
 
             if args.distanceModifier then
-                pDistance = fractured_world.distance_modifiers[args.distanceModifier](pDistance,
-                                                                                      angle, value)
+                pDistance = fractured_world:get_distance_modifier(args.distanceModifier)(pDistance,
+                                                                                         angle,
+                                                                                         value)
             end
 
             -- add data for this point to tables
@@ -211,9 +212,8 @@ local function create_voronoi_starting_area(elevation, value, pointDistance, arg
 
     if args.distanceModifier then
         local angle = noise.atan2(y, x) + 2 * math.pi
-        scaledDistance = fractured_world.distance_modifiers[args.distanceModifier](scaledDistance,
-                                                                                   angle,
-                                                                                   startingValue)
+        scaledDistance = fractured_world:get_distance_modifier(args.distanceModifier)(
+                             scaledDistance, angle, startingValue)
     end
 
     x = x + offset
@@ -243,9 +243,8 @@ local function create_voronoi_starting_area(elevation, value, pointDistance, arg
     local startingElevation = noise.max(starting_factor, absolute_starting_factor) * 100 +
                                   smallNoise
     local regular_factor = noise.delimit_procedure(
-                               noise.clamp(
-                                   (distanceToOrigin + smallNoise - startingAreaOuterRadius + 1) *
-                                       math.huge, 0, 1))
+                               noise.clamp((scaledDistance * 4 / 3 + smallNoise -
+                                               startingAreaOuterRadius + 1) * math.huge, 0, 1))
     local finalElevation = elevation * regular_factor + startingElevation * (1 - regular_factor)
     local finalValue = value * regular_factor + startingValue * (1 - regular_factor)
     local finalPointDistance = pointDistance * regular_factor + distanceForOres *
