@@ -9,7 +9,10 @@
             "request": "launch",
             "name": "Factorio Mod Debug",
             "factorioPath": "C:/Program Files/Factorio/bin/x64/factorio.exe",
-            "factorioArgs": ["--load-game", "lab"],
+en            "factorioArgs": [
+                "--load-game",
+                "lab"
+            ],
             "hookData": false
         },
         {
@@ -17,17 +20,31 @@
             "request": "launch",
             "name": "Factorio Mod Debug Data",
             "factorioPath": "C:/Program Files/Factorio/bin/x64/factorio.exe",
-            "factorioArgs": ["--load-game", "lab"],
+            "factorioArgs": [
+                "--load-game",
+                "lab"
+            ],
             "hookData": true
         },
-        
         {
             "type": "factoriomod",
             "request": "launch",
             "name": "Factorio Mod Debug AB",
             "factorioPath": "C:/Program Files/Factorio/bin/x64/factorio.exe",
-            "factorioArgs": ["--load-game", "AB Testing"],
+            "factorioArgs": [
+                "--load-game",
+                "AB Testing"
+            ],
             "hookData": false
+        },
+        {
+            "type": "factoriomod",
+            "request": "launch",
+            "name": "Factorio Mod Debug Fractured World",
+            "factorioPath": "C:/Program Files/Factorio/bin/x64/factorio.exe",
+            "adjustMods": {
+                "fractured-world": true,
+            }
         }
-    ]
+    ],
 }

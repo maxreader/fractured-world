@@ -21,5 +21,8 @@
     "vscode-lua-format.configPath": "C:/Users/travi/AppData/Roaming/Factorio/mods/fractured-world/.vscode/style.txt",
     "factorio.portal.username": "travis.aelvoet@gmail.com",
     "factorio.portal.password": "Enderdragon1!",
-    "factorio.package.onExplorer": true
+    "factorio.package.onExplorer": true,
+    "editor.semanticHighlighting.enabled": true,
+    "workbench.editor.highlightModifiedTabs": true,
+    "bracket-pair-colorizer-2.highlightActiveScope": true
 }
