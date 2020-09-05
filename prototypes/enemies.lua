@@ -1,7 +1,6 @@
 local noise = require("noise")
 local tne = noise.to_noise_expression
 local functions = require("prototypes.functions")
-local fnp = require("prototypes.fractured-noise-programs")
 local distance = noise.max(noise.var("distance") - noise.var("starting_area_radius") - 120, 0)
 local frequencySlider = functions.slider_to_scale("control-setting:enemy-base:frequency:multiplier")
 local sizeSlider = 1 - functions.slider_to_scale("control-setting:enemy-base:size:multiplier")
@@ -61,12 +60,11 @@ do
 end
 
 -- get islands that should have biters
-local moisture = noise.var("moisture")
 data:extend{
     {
         type = "noise-expression",
         name = "fractured-world-biter-islands",
-        expression = noise.less_than(moisture, thisFrequency)
+        expression = noise.less_than(noise.var("fw_value"), thisFrequency)
     }
 }
 local islandsWithBiters = noise.var("fractured-world-biter-islands")

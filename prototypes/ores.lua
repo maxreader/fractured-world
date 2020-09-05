@@ -7,7 +7,7 @@ local resources = data.raw["resource"]
 
 local radius = noise.var("fw_distance")
 local scaledRadius = (radius / functions.size)
-local aux = 1 - noise.var("fractured-world-aux")
+local aux = 1 - noise.var("fw_value")
 
 local startingAreaRadius = noise.var("fw_default_size")
 local starting_factor =

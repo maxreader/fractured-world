@@ -75,19 +75,19 @@ local function make_voronoi_noise_expressions(name, presetData)
             type = "noise-expression",
             name = "fractured-world-" .. name,
             order = "40" + count_to_order(count),
-            intended_property = "elevation",
+            -- intended_property = "elevation",
             expression = elevation
         }, {
             type = "noise-expression",
             name = "fractured-world-value-" .. name,
             order = "40" + count_to_order(count),
-            intended_property = "moisture",
+            intended_property = "fw_value",
             expression = value
         }, {
             type = "noise-expression",
             name = "fractured-world-point-distance-" .. name,
             order = "40" + count_to_order(count),
-            intended_property = "fw_distance",
+            -- intended_property = "fw_distance",
             expression = pointDistance
         }
     }
@@ -100,7 +100,7 @@ local function make_cartesian_noise_expressions(name, args)
         {
             type = "noise-expression",
             name = "fractured-world-" .. name,
-            intended_property = "elevation",
+            -- intended_property = "elevation",
             order = "40" + count_to_order(count),
             expression = noise.define_noise_function(
                 function(x, y, tile, map)
@@ -126,7 +126,7 @@ local function make_cartesian_noise_expressions(name, args)
 end
 
 local elevation = noise.var("elevation")
-data:extend{
+local prototypes = {
     {
         type = "autoplace-control",
         name = "island-randomness",
@@ -146,6 +146,15 @@ data:extend{
             "autoplace-control-description.map-rotation"
         }
     }, {
+        type = "autoplace-control",
+        name = "overall-resources",
+        richness = false,
+        order = "a",
+        category = "resource",
+        localised_description = {
+            "autoplace-control-description.overall-resources"
+        }
+    }, {
         type = "noise-expression",
         name = "control-setting:island-randomness:frequency:multiplier",
         expression = noise.to_noise_expression(1)
@@ -163,6 +172,14 @@ data:extend{
         expression = noise.to_noise_expression(-1)
     }, {
         type = "noise-expression",
+        name = "control-setting:overall-resources:frequency:multiplier",
+        expression = noise.to_noise_expression(1)
+    }, {
+        type = "noise-expression",
+        name = "control-setting:overall-resources:bias",
+        expression = noise.to_noise_expression(0)
+    }, {
+        type = "noise-expression",
         name = "fractured-world-concentric-circles",
         order = "4000",
         intended_property = "elevation",
@@ -174,16 +191,21 @@ data:extend{
         type = "noise-expression",
         name = "fractured-world-temperature",
         order = "4000",
-        expression = modulo(noise.var("moisture")) * temperatureRange + temperatureFloor
+        expression = modulo(noise.var("fw_value") * 47) * temperatureRange + temperatureFloor
     }, {
         type = "noise-expression",
         name = "fractured-world-aux",
         order = "4000",
-        expression = modulo(noise.var("moisture") * 631)
+        expression = modulo(noise.var("fw_value") * 631)
+    }, {
+        type = "noise-expression",
+        name = "fractured-world-moisture",
+        order = "4000",
+        expression = noise.var("fw_value")
     }, {
         type = "noise-expression",
         name = "fractured-world-cartesian-value",
-        intended_property = "moisture",
+        intended_property = "fw_value",
         expression = noise.define_noise_function(function(x, y, tile, map)
             local rotatedCoordinates = functions.rotate_map()
             x = rotatedCoordinates.x
@@ -196,7 +218,7 @@ data:extend{
     }, {
         type = "noise-expression",
         name = "fractured-world-chessboard-distance",
-        intended_property = "fw_distance",
+        -- intended_property = "fw_distance",
         expression = noise.define_noise_function(function(x, y, tile, map)
             local rotatedCoordinates = functions.rotate_map()
             x = rotatedCoordinates.x
@@ -275,6 +297,11 @@ data:extend{
         expression = tne(0)
     }, {
         type = "noise-expression",
+        name = "fw_value",
+        intended_property = "fw_value",
+        expression = noise.var("fractured-world-value-default")
+    }, {
+        type = "noise-expression",
         name = "fw_default_size",
         intended_property = "fw_default_size",
         expression = tne(settings.startup["fractured-world-default-cell-size"].value)
@@ -326,6 +353,7 @@ data:extend{
         end)
     }
 }
+data:extend(prototypes)
 data.raw.tile["lab-dark-1"].autoplace = {
     probability_expression = tne(-math.huge)
 }

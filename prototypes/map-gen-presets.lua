@@ -40,17 +40,18 @@ local function make_preset(name, args)
         end
         local elevation = "fractured-world-" .. name
         local fw_distance = "fractured-world-point-distance-" .. name
-        local moisture = "fractured-world-value-" .. name
+        local fw_value = "fractured-world-value-" .. name
         if args.cartesian then
-            moisture = "fractured-world-cartesian-value"
+            fw_value = "fractured-world-cartesian-value"
             fw_distance = "fractured-world-chessboard-distance"
         end
         local defaultSize = args.defaultSize or "fw_default_size"
         property_expression_names = {
             elevation = elevation,
-            moisture = moisture,
+            moisture = "fractured-world-moisture",
             temperature = "fractured-world-temperature",
             aux = "fractured-world-aux",
+            fw_value = fw_value,
             fw_distance = fw_distance,
             fw_default_size = defaultSize
         }
