@@ -79,6 +79,7 @@ local presets = {
         mapGrid = true,
         fracturedResources = false,
         fracturedEnemies = false
-    }
+    },
+    ["fractured-resources"] = {fracturedEnemies = false}
 }
 for k, v in pairs(presets) do fractured_world:add_preset_data(k, v) end

@@ -131,7 +131,7 @@ local function pseudo_random(x, y)
     local x0 = noise.var("map_seed") / 2 ^ 34
     local y0 = tne(0.534561)
     local angle = (x * x0 + y * y0)
-    return modulo(noise.sin(angle * 49300))
+    return modulo(modulo(noise.sin(angle * 49300) * 631))
 end
 
 --- Get a random point within a cell.
