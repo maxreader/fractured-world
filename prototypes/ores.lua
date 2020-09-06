@@ -12,7 +12,7 @@ local aux = 1 - noise.var("fw_value")
 local startingAreaRadius = noise.var("fw_default_size")
 local starting_factor =
     noise.delimit_procedure(noise.clamp(-noise.min(radius, 0) * math.huge, 0, 1))
-local startingPatchScaleFactor = noise.min(startingAreaRadius / 128, 1)
+local startingPatchScaleFactor = (startingAreaRadius / 128) ^ 0.5, 1
 local startingPatchDefaultRadius = 15 * startingPatchScaleFactor
 
 local currentResourceData = {}
@@ -121,7 +121,8 @@ for ore, oreData in pairs(currentResourceData) do
         1 + ((oreData.starting_rq_factor_multiplier or 1) - 1) * tne(starting_factor)
 end
 
-local overallFrequency = settings.startup["fractured-world-overall-resource-frequency"].value
+local overallFrequency = settings.startup["fractured-world-overall-resource-frequency"].value *
+                             noise.var("control-setting:overall-resources:frequency:multiplier") ^ 2
 local maxPatchesPerKm2 = overallFrequency * 64
 local oreCountMultiplier = noise.delimit_procedure(noise.max(1, oreCount / maxPatchesPerKm2))
 
@@ -204,7 +205,7 @@ local function get_probability(ore)
         local x = noise.var("x")
         local y = noise.var("y")
         local distanceFromPoint = functions.distance(point_x - x, point_y - y)
-        probability_expression = probability_expression +
+        probability_expression = noise.clamp(probability_expression, 0, 1) +
                                      noise.less_than(distanceFromPoint, startingPatchRadius +
                                                          (noise.var("fw-small-noise") / 25))
     end
