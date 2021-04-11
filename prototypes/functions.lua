@@ -165,7 +165,10 @@ local function count_to_order(count)
 end
 local random_offset_factor = slider_to_scale(
                                  "control-setting:island-randomness:frequency:multiplier")
-local size = noise.var("fw_default_size") / noise.var("segmentation_multiplier")
+-- local size = noise.var("fw_default_size") / noise.var("segmentation_multiplier")
+local defaultSize = settings.startup["fractured-world-default-cell-size"].value *
+                        noise.var("control-setting:overall-resources:size:multiplier")
+local size = defaultSize / noise.var("segmentation_multiplier")
 return {
     slider_to_scale = slider_to_scale,
     floorDiv = floorDiv,
@@ -187,5 +190,6 @@ return {
     get_random_point = get_random_point,
     count_to_order = count_to_order,
     rof = random_offset_factor,
+    defaultSize = defaultSize,
     size = size
 }

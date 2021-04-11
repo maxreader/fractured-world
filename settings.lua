@@ -1,27 +1,13 @@
-local fw_settings = {
-    {
-        type = "int-setting",
-        name = "fractured-world-default-cell-size",
-        setting_type = "startup",
-        default_value = 128,
-        minimum_value = 0
-    }, {
-        type = "double-setting",
-        name = "fractured-world-overall-resource-frequency",
-        setting_type = "startup",
-        default_value = 0.02,
-        minimum_value = 0,
-        maximum_value = 1
-    }, {
-        type = "bool-setting",
-        name = "fractured-world-enable-infinite-parenting",
-        setting_type = "startup",
-        default_value = true
-    }
-}
-local n = 0
-for _, setting in pairs(fw_settings) do
-    setting.order = tostring(n)
-    n = n + 1
+local presets = require("raw-data.preset-data")
+fractured_world = fractured_world or {}
+fractured_world.allowed_presets =
+    fractured_world.allowed_presets or {}
+function fractured_world.add_preset_to_settings(self,
+                                                preset_name)
+    table.insert(fractured_world.allowed_presets,
+                 preset_name)
 end
-data:extend(fw_settings)
+
+for name, _ in pairs(presets) do
+    fractured_world:add_preset_to_settings(name)
+end

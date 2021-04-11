@@ -24,6 +24,11 @@ if mods["alien-biomes"] then
     temperatureFloor = -20
 end
 
+noise.equals = function(lhs, rhs)
+    -- return 1 - noise.clamp((noise.absolute_value(lhs - rhs) - 0.1) * math.huge, 0, 1)
+    return noise.less_than(noise.absolute_value(lhs - rhs), 0.001)
+end
+
 local count = 0
 local function make_voronoi_noise_expressions(name, presetData)
     local args = presetData.voronoi or {}
@@ -52,7 +57,7 @@ local function make_voronoi_noise_expressions(name, presetData)
         local points = get_closest_two_points(x, y, args)
         local d1 = points.distance
         local d2 = points.secondDistance
-        elevation = fnp.create_elevation((d1 - d2), args) - noise.var("fw_default_size") * 3 / 2 -- ]]
+        elevation = fnp.create_elevation((d1 - d2), args) - functions.defaultSize * 3 / 2 -- ]]
         pointDistance = points.distance
         value = points.value
 
@@ -176,7 +181,7 @@ local prototypes = {
         expression = noise.to_noise_expression(1)
     }, {
         type = "noise-expression",
-        name = "control-setting:overall-resources:bias",
+        name = "control-setting:overall-resources:size:multiplier",
         expression = noise.to_noise_expression(0)
     }, {
         type = "noise-expression",
@@ -259,7 +264,8 @@ local prototypes = {
                 y = noise.var("y"),
                 seed0 = tne(004),
                 seed1 = noise.var("map_seed"),
-                input_scale = tne(1 / 10 * noise.var("fw_default_size") / 128),
+                input_scale = tne(1 / 10 *
+                                      noise.var("control-setting:overall-resources:size:multiplier")),
                 output_scale = tne(10),
                 octaves = tne(4),
                 octave_output_scale_multiplier = tne(2),
@@ -300,7 +306,7 @@ local prototypes = {
         name = "fw_value",
         intended_property = "fw_value",
         expression = noise.var("fractured-world-value-default")
-    }, {
+    }, --[[{
         type = "noise-expression",
         name = "fw_default_size",
         intended_property = "fw_default_size",
@@ -315,7 +321,7 @@ local prototypes = {
         name = "fw_quarter_default_size",
         intended_property = "fw_default_size",
         expression = tne(settings.startup["fractured-world-default-cell-size"].value / 4)
-    }, {
+    }, ]] {
         type = "noise-expression",
         name = "fw_rotated_x",
         expression = tne(functions.rotate_map().x)
@@ -337,6 +343,8 @@ local prototypes = {
             x = modulo(x, 32)
             y = modulo(y, 32)
             local isGrid = 1 - noise.clamp(x * y, 0, 1)
+            local isLand = noise.less_than(-elevation, 0)
+            local isGrid = noise.equals(x * y, 0)
             return 1000 * (isGrid) * (isLand) - 500
         end)
     }, {
@@ -345,10 +353,12 @@ local prototypes = {
         expression = noise.define_noise_function(function(x, y, tile, map)
             x = noise.floor(x)
             y = noise.floor(y)
-            local isWater = noise.clamp(noise.clamp(-elevation, -1, 1) * math.huge, 0, 1)
+            --[[local isWater = noise.clamp(noise.clamp(-elevation, -1, 1) * math.huge, 0, 1)]]
             x = modulo(x, 32)
             y = modulo(y, 32)
-            local isGrid = 1 - noise.clamp(x * y, 0, 1)
+            --[[local isGrid = 1 - noise.clamp(x * y, 0, 1)]]
+            local isWater = noise.less_than(elevation, 0)
+            local isGrid = noise.equals(x * y, 0)
             return 10000 * isGrid * (isWater) - 500
         end)
     }

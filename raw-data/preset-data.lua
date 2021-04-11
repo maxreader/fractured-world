@@ -1,4 +1,4 @@
-local presets = {
+return {
     ["default"] = {
         fracturedControls = {size = 1},
         basic_settings = {water = 1 / 3},
@@ -49,22 +49,42 @@ local presets = {
     ["waves"] = {
         defaultSize = "fw_half_default_size",
         fracturedControls = {frequency = 6, size = 6},
-        cartesian = "waves"
+        cartesian = "waves",
+        basic_settings = {
+            autoplace_controls = {
+                ["overall-resources"] = {size = 0.5}
+            }
+        }
     },
     ["trellis"] = {
         defaultSize = "fw_half_default_size",
         rotation = {1, 2},
-        cartesian = "is_trellis_square"
+        cartesian = "is_trellis_square",
+        basic_settings = {
+            autoplace_controls = {
+                ["overall-resources"] = {size = 0.5}
+            }
+        }
     },
     ["random-squares"] = {
         defaultSize = "fw_half_default_size",
         fracturedControls = {frequency = 6},
-        cartesian = "is_random_square"
+        cartesian = "is_random_square",
+        basic_settings = {
+            autoplace_controls = {
+                ["overall-resources"] = {size = 0.5}
+            }
+        }
     },
     ["polytopic"] = {
         defaultSize = "fw_half_default_size",
         fracturedControls = {frequency = 2 / 3},
-        cartesian = "is_polytopic_square"
+        cartesian = "is_polytopic_square",
+        basic_settings = {
+            autoplace_controls = {
+                ["overall-resources"] = {size = 0.5}
+            }
+        }
     },
     ["infinite-coastline"] = {
         basic_settings = {
@@ -75,11 +95,10 @@ local presets = {
         fracturedResources = false,
         fracturedEnemies = false
     },
-    ["gridworld"] = {
+    --[[["gridworld"] = {
         mapGrid = true,
         fracturedResources = false,
         fracturedEnemies = false
-    },
+    },]]
     ["fractured-resources"] = {fracturedEnemies = false}
 }
-for k, v in pairs(presets) do fractured_world:add_preset_data(k, v) end

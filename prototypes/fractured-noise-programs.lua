@@ -194,7 +194,7 @@ local function create_elevation(effectiveDistance, args)
                noise.var("fw-scaling-noise") / 25 * small_noise_factor
 end
 
-local defaultSize = noise.var("fw_default_size")
+local defaultSize = functions.defaultSize
 local startingAreaOuterRadius = 3 * defaultSize
 
 local function create_voronoi_starting_area(elevation, value, pointDistance, args)
