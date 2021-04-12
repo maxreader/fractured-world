@@ -9,10 +9,7 @@
             "request": "launch",
             "name": "Factorio Mod Debug",
             "factorioPath": "C:/Program Files/Factorio/bin/x64/factorio.exe",
-en            "factorioArgs": [
-                "--load-game",
-                "lab"
-            ],
+            "factorioArgs": [],
             "hookData": false
         },
         {
