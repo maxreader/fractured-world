@@ -322,10 +322,10 @@ local prototypes = {
         name = "fw_value",
         intended_property = "fw_value",
         expression = noise.var("fractured-world-value-default")
-    },{
+    }, {
         type = "noise-expression",
         name = "fw_land_density",
-        expression = (75.17 * waterLevel ^ 2 - 18503 * waterLevel + 451000
+        expression = (75.17 * waterLevel ^ 2 - 18503 * waterLevel + 451000)
     },
     {type = "noise-expression", name = "fw_rotated_x", expression = tne(functions.rotate_map().x)},
     {type = "noise-expression", name = "fw_rotated_y", expression = tne(functions.rotate_map().y)},
