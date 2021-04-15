@@ -7,7 +7,7 @@
     "homepage": "",
     "factorio_version": "1.1",
     "dependencies": [
-        "base >= 0.17"
+        "base >= 1.0"
     ],
     "description": "Shatters Factorio terrain generation and rebuilds it from the ground up.\nEnclosed are many wacky map presets to spice up gameplay.",
     "package": {

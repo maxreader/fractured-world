@@ -72,11 +72,7 @@ local function get_point_data(x, y, args)
         table.remove(angles, 5)
         table.remove(values, 5)
     end
-    return {
-        distances = distances,
-        angles = angles,
-        values = values
-    }
+    return {distances = distances, angles = angles, values = values}
 end
 
 --- Used for "basic" presets like circle, square, and diamond
@@ -87,6 +83,14 @@ local function get_closest_point_and_value(x, y, args)
     local distances = pointData.distances
     local values = pointData.values
     local angles = pointData.angles
+    if args.class == "vanilla-islands" then
+        x = noise.var("x")
+        y = noise.var("y")
+
+        table.insert(distances, distance(x, y))
+        table.insert(values, functions.pseudo_random(0, 0))
+        table.insert(angles, noise.atan2(y, x))
+    end
 
     -- Find the minimum distance, and use it to flatten undesired values and angles
     local minDistance = get_extremum("min", distances)
@@ -100,11 +104,7 @@ local function get_closest_point_and_value(x, y, args)
     local value = get_extremum("max", values)
     local angle = get_extremum("max", angles)
 
-    return {
-        distance = minDistance,
-        angle = angle,
-        value = value
-    }
+    return {distance = minDistance, angle = angle, value = value}
 end
 
 -- Used for more complex presets that need the two closest points: Default
@@ -132,16 +132,11 @@ local function get_closest_two_points(x, y, args)
     -- Choose the remaining value and angle
     local value = get_extremum("max", values)
     local angle = get_extremum("max", angles)
-    return {
-        distance = minDistance,
-        secondDistance = secondDistance,
-        angle = angle,
-        value = value
-    }
+    return {distance = minDistance, secondDistance = secondDistance, angle = angle, value = value}
 end
 
-local function get_closest_two_points_3(x, y, width, distanceType, pointType)
-    local pointData = get_point_data(x, y, width, distanceType, pointType)
+local function get_closest_two_points_3(x, y, args)
+    local pointData = get_point_data(x, y, args)
     local distances = pointData.distances
     local values = pointData.values
     local angles = pointData.angles
@@ -152,7 +147,7 @@ local function get_closest_two_points_3(x, y, width, distanceType, pointType)
     for k, v in pairs(distances) do
         -- magic function to get second minimum
         newDistances[k] = (1 / (v - minDistance - 0.0001))
-        local factor = noise.clamp((minDistance - v) * width, -1, 0) + 1
+        local factor = noise.clamp((minDistance - v) * 1000000, -1, 0) + 1
         values[k] = factor * values[k]
         minAngles[k] = factor * angles[k]
     end
@@ -162,9 +157,7 @@ local function get_closest_two_points_3(x, y, width, distanceType, pointType)
     local angle = get_extremum("max", minAngles)
     local secondDistance = 1 / secondDistanceI + minDistance + 0.0001
     for k, v in pairs(distances) do
-        local factor = 1 -
-                           noise.clamp(noise.absolute_value((secondDistance - v) * width * 1000), 0,
-                                       1)
+        local factor = 1 - noise.clamp(noise.absolute_value((secondDistance - v) * 1000), 0, 1)
         secondAngles[k] = factor * angles[k]
     end
     local secondAngle = get_extremum("max", secondAngles)
@@ -254,11 +247,7 @@ local function create_voronoi_starting_area(elevation, value, pointDistance, arg
     local everything_else_factor = functions.sharp_step(scaledDistance, 1.5, 2)
     return (10 * (starting_area_factor) + elevation * everything_else_factor)--]]
 
-    return {
-        elevation = finalElevation,
-        value = finalValue,
-        pointDistance = finalPointDistance
-    }
+    return {elevation = finalElevation, value = finalValue, pointDistance = finalPointDistance}
 end
 
 local function make_ridges(octaves, baseAmplitude, persistence, amplitudeScaling)
@@ -292,6 +281,7 @@ end -- ]]
 return {
     get_closest_point_and_value = get_closest_point_and_value,
     get_closest_two_points = get_closest_two_points,
+    get_closest_two_points_3 = get_closest_two_points_3,
     is_bridge = is_bridge,
     is_border = is_border,
     small_noise_factor = small_noise_factor,

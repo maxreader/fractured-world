@@ -47,11 +47,14 @@ local function is_trellis_square(x, y)
     return noise.min(x, y)
 end
 
+local function is_chessboard_square(x, y) return modulo(x + y, 2) end
+
 local cartesianFunctions = {
     ["waves"] = waves,
     ["on_spiral"] = on_spiral,
     ["is_random_square"] = is_random_square,
     ["is_polytopic_square"] = is_polytopic_square,
-    ["is_trellis_square"] = is_trellis_square
+    ["is_trellis_square"] = is_trellis_square,
+    ["is_chessboard_square"] = is_chessboard_square
 }
 for k, v in pairs(cartesianFunctions) do fractured_world:add_cartesian_function(k, v) end

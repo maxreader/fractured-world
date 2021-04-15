@@ -45,30 +45,31 @@ local function make_preset(name, args)
             fw_value = "fractured-world-cartesian-value"
             fw_distance = "fractured-world-chessboard-distance"
         end
-        -- local defaultSize = args.defaultSize or "fw_default_size"
-        property_expression_names = {
-            elevation = elevation,
-            moisture = "fractured-world-moisture",
-            temperature = "fractured-world-temperature",
-            aux = "fractured-world-aux",
-            fw_value = fw_value,
-            fw_distance = fw_distance
-            -- fw_default_size = defaultSize
-        }
+        if not (args.voronoi and args.voronoi.vanillaIslands) then
+            property_expression_names = {
+                elevation = elevation,
+                moisture = "fractured-world-moisture",
+                temperature = "fractured-world-temperature",
+                aux = "fractured-world-aux",
+                fw_value = fw_value,
+                fw_distance = fw_distance
+            }
+        else
+            property_expression_names = {
+                elevation = elevation,
+                fw_value = fw_value,
+                fw_distance = fw_distance
+            }
+        end
+
     end
 
     local genericBasicSettings = {
         property_expression_names = property_expression_names,
         cliff_settings = {richness = 0},
         autoplace_controls = {
-            ["island-randomness"] = {
-                frequency = frequency,
-                size = size
-            },
-            ["map-rotation"] = {
-                frequency = mapRotation[1],
-                size = mapRotation[2]
-            }
+            ["island-randomness"] = {frequency = frequency, size = size},
+            ["map-rotation"] = {frequency = mapRotation[1], size = mapRotation[2]}
         }
     }
     local mgs = args.basic_settings or {}
@@ -93,10 +94,9 @@ local function make_preset(name, args)
             "fractured-world-water-grid"
     end
 
-    mgp["fractured-world-" .. name] = {
-        order = "h-" .. count_to_order(count),
-        basic_settings = mgs
-    }
+    mgp["fractured-world-" .. name] = {order = "h-" .. count_to_order(count), basic_settings = mgs}
     count = count + 1
 end
 for name, args in pairs(fractured_world.preset_data) do make_preset(name, args) end
+
+mgp.default = nil

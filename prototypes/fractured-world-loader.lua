@@ -2,9 +2,7 @@ fractured_world = {}
 fractured_world.raw_resource_data = {}
 
 local function checkString(v)
-    if type(v) ~= "string" then
-        error(tostring(v) .. " must be a string")
-    end
+    if type(v) ~= "string" then error(tostring(v) .. " must be a string") end
 end
 --- Adds a distance modifier to Fractured World.
 -- Distance Modifiers work on voronoi-type presets
@@ -14,16 +12,11 @@ end
 -- Value - The random "value" of the point of interest
 -- @param name The name of the modifier
 -- @param func The function
-function fractured_world.add_distance_modifier(self,
-                                               name,
-                                               func)
+function fractured_world.add_distance_modifier(self, name, func)
     if type(name) ~= "string" or type(func) ~= "function" then
-        error("Invalid distance modifier specification: " ..
-                  name)
+        error("Invalid distance modifier specification: " .. name)
     end
-    if not self.distance_modifiers then
-        self.distance_modifiers = {}
-    end
+    if not self.distance_modifiers then self.distance_modifiers = {} end
     self.distance_modifiers[name] = func
 end
 
@@ -32,8 +25,7 @@ function fractured_world.get_distance_modifier(self, name)
     if func then
         return func
     else
-        error("Distance modifier " .. name ..
-                  " is not defined")
+        error("Distance modifier " .. name .. " is not defined")
     end
 end
 
@@ -72,29 +64,22 @@ end
 -- Each function returns a boolean (1 or 0 value) that determines whether a cell should have land or not
 -- @param name The name of the function
 -- @param func The function
-function fractured_world.add_cartesian_function(self,
-                                                name,
-                                                func)
+function fractured_world.add_cartesian_function(self, name, func)
     if type(name) ~= "string" or type(func) ~= "function" then
-        error(
-            "Invalid cartesian function specification: " ..
-                name)
+        error("Invalid cartesian function specification: " .. name)
     end
-    if not self.cartesian_functions then
-        self.cartesian_functions = {}
-    end
+    if not self.cartesian_functions then self.cartesian_functions = {} end
     fractured_world.cartesian_functions[name] = func
 end
 
 --- Returns the cartesian function identified by the given name
 -- @param name The name of the function
-function fractured_world.get_cartesian_function(self,
-                                                name)
+function fractured_world.get_cartesian_function(self, name)
     local func = self.cartesian_functions[name]
     if func then
         return func
     else
-        error("Point type " .. name .. " is not defined")
+        error("Cartesian function " .. name .. " is not properly defined")
     end
 end
 
@@ -116,9 +101,7 @@ end
 -- * cartesian - name of cartesian function to use
 -- @param name The name of the modifier
 -- @param parameters A table defining the preset
-function fractured_world.add_preset_data(self,
-                                         name,
-                                         parameters)
+function fractured_world.add_preset_data(self, name, parameters)
     if type(name) ~= "string" or type(parameters) ~= "table" then
         error("Invalid preset specification: " .. name)
     end
@@ -133,67 +116,41 @@ function fractured_world.get_preset_data(self, name)
     if preset then
         return preset
     else
-        error(tostring(name) ..
-                  " is not a registered preset")
+        error(tostring(name) .. " is not a registered preset")
     end
 end
 
 --- Sets resource data for a given mod
 -- @param modname The name of the mod. Changes will only be used if this mod is present and active
 -- @param resources Table of resource-name -> resource specification
-function fractured_world.set_resource_data(self,
-                                           modname,
-                                           resources)
-    if type(modname) ~= "string" or type(resources) ~=
-        "table" then
+function fractured_world.set_resource_data(self, modname, resources)
+    if type(modname) ~= "string" or type(resources) ~= "table" then
         error("Invalid resource data: " .. modname)
     end
-    if not self.raw_resource_data then
-        self.raw_resource_data = {}
-    end
+    if not self.raw_resource_data then self.raw_resource_data = {} end
     fractured_world.raw_resource_data[modname] = resources
 end
 
 local allowed_class2 = {probability = true, richness = true}
 local allowed_class1 = {resource = true, enemy = true}
-function fractured_world.add_property_expression(self,
-                                                 name,
-                                                 class1,
-                                                 class2,
-                                                 expression)
+function fractured_world.add_property_expression(self, name, class1, class2, expression)
     checkString(name)
     checkString(class1)
     checkString(class2)
     if not allowed_class1[class1] then
-        error(tostring(class2) ..
-                  " is not a valid property expression type.")
+        error(tostring(class2) .. " is not a valid property expression type.")
     end
     if not allowed_class2[class2] then
-        error(tostring(class2) ..
-                  " is not a valid property expression type.")
+        error(tostring(class2) .. " is not a valid property expression type.")
     end
-    if not self.property_expressions then
-        self.property_expressions =
-            {resource = {}, enemy = {}}
-    end
-    local noiseExpName =
-        "fractured-world-" .. name .. "-" ..
-            tostring(class2)
-    local propExpName = "entity:" .. name .. ":" ..
-                            tostring(class2)
-    data:extend{
-        {
-            type = "noise-expression",
-            name = noiseExpName,
-            expression = expression
-        }
-    }
+    if not self.property_expressions then self.property_expressions = {resource = {}, enemy = {}} end
+    local noiseExpName = "fractured-world-" .. name .. "-" .. tostring(class2)
+    local propExpName = "entity:" .. name .. ":" .. tostring(class2)
+    data:extend{{type = "noise-expression", name = noiseExpName, expression = expression}}
     if class1 == "resource" then
-        self.property_expressions.resource[propExpName] =
-            noiseExpName
+        self.property_expressions.resource[propExpName] = noiseExpName
     elseif class1 == "enemy" then
-        self.property_expressions.enemy[propExpName] =
-            noiseExpName
+        self.property_expressions.enemy[propExpName] = noiseExpName
     end
 
 end
