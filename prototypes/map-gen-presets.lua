@@ -99,4 +99,4 @@ local function make_preset(name, args)
 end
 for name, args in pairs(fractured_world.preset_data) do make_preset(name, args) end
 
-mgp.default = nil
+mgp.default.default = false
