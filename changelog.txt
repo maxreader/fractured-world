@@ -2,6 +2,9 @@
 Version: 1.0.3
 Date: ????
   Changes:
+    - Added chessboard, vanilla islands presets
+  Bugfixes:
+    - Removed chance for starting areas to be covered in ore. Instead they sometimes have missing ore
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.2
 Date: 2021-04-11
