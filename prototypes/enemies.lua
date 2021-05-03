@@ -73,6 +73,7 @@ local wormCircle = noise.delimit_procedure(noise.less_than(thisSize, scaledRadiu
 
 local count = 0
 local function make_enemy_autoplace(type, prototypeData, penalty_multiplier)
+    -- Prototypes are scraped here
     local prototypes = data.raw[type]
     local totalWeight = 0
     penalty_multiplier = penalty_multiplier or 1
@@ -104,8 +105,7 @@ local function make_enemy_autoplace(type, prototypeData, penalty_multiplier)
             }
 
             local factors = {
-                (prototypeData[name].weight / totalWeight),
-                placeAtThisDistance, thisSize,
+                (prototypeData[name].weight / totalWeight), placeAtThisDistance, thisSize,
                 islandsWithBiters, penalty
             }
             if type == "unit-spawner" then
@@ -132,6 +132,8 @@ local turretData = {
     ["big-worm-turret"] = {distance_factor = 5},
     ["behemoth-worm-turret"] = {distance_factor = 8}
 }
+
+-- Why is this empty?
 local spawnerData = {}
 make_enemy_autoplace("unit-spawner", spawnerData)
 make_enemy_autoplace("turret", turretData)

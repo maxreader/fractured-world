@@ -24,5 +24,9 @@
     "factorio.package.onExplorer": true,
     "editor.semanticHighlighting.enabled": true,
     "workbench.editor.highlightModifiedTabs": true,
-    "bracket-pair-colorizer-2.highlightActiveScope": true
+    "bracket-pair-colorizer-2.highlightActiveScope": true,
+    "Lua.workspace.library": [
+        "C:\\Users\\travi\\AppData\\Roaming\\Factorio\\FactorioApiData"
+    ],
+    "Lua.workspace.preloadFileSize": 200
 }
