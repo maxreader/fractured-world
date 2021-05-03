@@ -2,6 +2,11 @@
 Version: 1.0.4
 Date: ????
   Changes:
+    - hardCrafting support
+  New:
+    - Quick startup preset setting
+  Bugfixes:
+    - Missing locale
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.3
 Date: 2021-04-17
