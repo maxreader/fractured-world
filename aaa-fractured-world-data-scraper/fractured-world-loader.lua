@@ -1,5 +1,24 @@
 fractured_world = {}
-fractured_world.raw_resource_data = {}
+fractured_world.raw_resource_data = {
+    ["iron-ore"] = {base_density = 10, starting_rq_factor_multiplier = 1.5},
+    ["copper-ore"] = {base_density = 8, starting_rq_factor_multiplier = 1.2},
+    ["coal"] = {base_density = 8, starting_rq_factor_multiplier = 1.1},
+    ["stone"] = {base_density = 4, starting_rq_factor_multiplier = 1.1},
+    ["uranium-ore"] = {
+        base_density = 0.9,
+        base_spots_per_km2 = 1.25,
+        random_spot_size_minimum = 2,
+        random_spot_size_maximum = 4
+    },
+    ["crude-oil"] = {
+        base_density = 8.2,
+        base_spots_per_km2 = 1.8,
+        random_spot_size_minimum = 1,
+        random_spot_size_maximum = 1,
+        additional_richness = 220000,
+        random_probability = 1 / 48
+    }
+}
 
 local function checkString(v)
     if type(v) ~= "string" then error(tostring(v) .. " must be a string") end
@@ -123,13 +142,17 @@ end
 --- Sets resource data for a given mod
 -- @param modname The name of the mod. Changes will only be used if this mod is present and active
 -- @param resources Table of resource-name -> resource specification
-function fractured_world.set_resource_data(self, modname, resources)
+function fractured_world.set_resource_data(self, resource, params)
+    fractured_world.raw_resource_data[resource] = params
+end
+
+--[[function fractured_world.set_resource_data(self, modname, resources)
     if type(modname) ~= "string" or type(resources) ~= "table" then
         error("Invalid resource data: " .. modname)
     end
     if not self.raw_resource_data then self.raw_resource_data = {} end
     fractured_world.raw_resource_data[modname] = resources
-end
+end--]]
 
 local allowed_class2 = {probability = true, richness = true}
 local allowed_class1 = {resource = true, enemy = true}

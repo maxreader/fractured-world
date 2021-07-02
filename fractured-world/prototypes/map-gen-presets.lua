@@ -10,14 +10,20 @@ local make_voronoi_noise_expressions = fne.make_voronoi_noise_expressions
         name = "debug",
         expression = noise.var("finite_water_level") * 100
     }
-}
+}]]
+local noise = require("noise")
+local radius = noise.absolute_value(noise.var("fractured-world-point-distance-diamonds"))
+
+local scaledRadius = (1 - radius / functions.size) * 100 - 50
+
+data:extend({{type = "noise-expression", name = "scaled-radius", expression = scaledRadius}})
 
 mgp["fw-debug"] = {
     order = "h",
     basic_settings = {
         property_expression_names = {
-            ["entity:iron-ore:richness"] = "debug",
-            ["entity:iron-ore:probability"] = 10,
+            ["entity:angels-ore1:richness"] = "scaled-radius",
+            ["entity:angels-ore1:probability"] = 10,
             elevation = 10
         }
     }

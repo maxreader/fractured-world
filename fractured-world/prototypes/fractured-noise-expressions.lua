@@ -317,11 +317,12 @@ local prototypes = {
         name = "fw_distance",
         intended_property = "fw_distance",
         expression = tne(0)
-    }, {
+    },
+    {
         type = "noise-expression",
         name = "fw_value",
         intended_property = "fw_value",
-        expression = noise.var("fractured-world-value-default")
+        expression = tne(0)
     }, {
         type = "noise-expression",
         name = "fw_land_density",

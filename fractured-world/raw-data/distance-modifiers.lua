@@ -2,6 +2,8 @@ local noise = require("noise")
 noise["abs"] = noise.absolute_value
 local functions = require("prototypes.functions")
 local pi = math.pi
+local cos = noise.cos
+local sin = noise.sin
 
 local function make_gear(minDistance, angle, value)
     angle = angle + value * 2 * math.pi
@@ -23,6 +25,14 @@ local function make_flower(distance, angle, value)
     local h = noise.abs(noise.sin(angle * n / 2)) * 2
     local j = noise.abs(noise.sin(angle * n)) * 4
     local factor = 1 + (1 - h) / (1 + j) / 2
+    return distance / factor
+end
+
+local function make_fish(distance, angle, value)
+    angle = angle + value * 2 * math.pi
+    local x = cos(angle) - sin(angle) ^ 2 / 2 ^ 0.5
+    local y = cos(angle) * sin(angle)
+    local factor = functions.distance(x, y)
     return distance / factor
 end
 

@@ -4,7 +4,7 @@
 -- random_spot_size_maximum default = 2
 -- add-richness
 -- random_probability
-local pyRockFreq = 1 / 120
+--[[local pyRockFreq = 1 / 120
 local pyRock = {
     base_density = 800 / 3,
     base_spots_per_km2 = 0.12,
@@ -224,4 +224,4 @@ coverage = 0.004 -> base_spots_per_km2 = 2.5
 richness_base = 300 -> 1000000
 richness_multiplier = 1500 -> richness_post_multiplier = 1
 richness_multiplier_distance_bonus = 30
-]]
+]] 

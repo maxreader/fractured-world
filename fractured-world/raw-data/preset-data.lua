@@ -84,5 +84,15 @@ return {
         fracturedResources = false,
         fracturedEnemies = false
     },]]
-    ["fractured-resources"] = {fracturedEnemies = false}
+    ["fractured-resources"] = {
+        fracturedControls = {frequency = 6, size = 3 / 2},
+        fracturedEnemies = false,
+        basic_settings = {
+            property_expression_names = {
+                ["fw_value"] = "fractured-world-value-diamonds",
+                ["fw_distance"] = "fractured-world-point-distance-diamonds"
+            },
+            autoplace_controls = {["overall-resources"] = {size = 0.5}}
+        }
+    }
 }

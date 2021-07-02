@@ -41,7 +41,8 @@
             "factorioPath": "C:/Program Files/Factorio/bin/x64/factorio.exe",
             "adjustMods": {
                 "fractured-world": true,
-            }
+            },
+            "hookData": true
         }
     ],
 }

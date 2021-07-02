@@ -4,18 +4,19 @@ local functions = require("functions")
 local fnp = require("fractured-noise-programs")
 
 local resources = data.raw["resource"]
+local radius = noise.absolute_value(noise.var("fw_distance"))
 
-local radius = noise.var("fw_distance")
 local scaledRadius = (radius / functions.size)
-local aux = noise.var("fw_value")
+local aux = functions.modulo(noise.var("fw_value") * 29)
 
 local startingAreaRadius = functions.defaultSize
 local starting_factor =
     noise.delimit_procedure(noise.clamp(-noise.min(radius, 0) * math.huge, 0, 1))
-local startingPatchScaleFactor = (startingAreaRadius / 128) ^ 0.5, 1
+local startingPatchScaleFactor = noise.max((startingAreaRadius / 128) ^ 0.5, 1)
 local startingPatchDefaultRadius = 15 * startingPatchScaleFactor
 
 local function probSearch(tab)
+    if not tab then return nil end
     if tab.function_name == "random-penalty" then
         return tab.arguments.amplitude.literal_value
     elseif tab.arguments == nil then
@@ -38,13 +39,11 @@ local currentResourceData = {}
         log(serpent.block(v.autoplace))
     end
 end]]
-for k, v in pairs(fractured_world.raw_resource_data) do
-    for ore, oreData in pairs(v) do
-        if resources[ore] and resources[ore].autoplace then
-            currentResourceData[ore] = oreData
-        end
-    end
+for ore, oreData in pairs(fractured_world.raw_resource_data) do
+    -- for ore, oreData in pairs(v) do
+    if resources[ore] and resources[ore].autoplace then currentResourceData[ore] = oreData end
 end
+-- end
 
 local starting_patches = resource_autoplace__patch_metasets.starting.patch_set_indexes
 local regular_patches = resource_autoplace__patch_metasets.regular.patch_set_indexes
@@ -90,13 +89,15 @@ for ore, oreData in pairs(currentResourceData) do
         local parentOreName = string.sub(ore, 10)
         if resources[parentOreName] then
             infiniteOreData[ore] = {parentOreName = parentOreName}
+            -- Why is this there?
             currentResourceData[ore] = nil
             currentResourceData[parentOreName].has_infinite_version = true
         end
     end
     local is_starting_patch = (starting_patches[ore] or resources[ore].autoplace.starting_area ==
-                                  true or currentResourceData[ore].has_starting_area_placement ==
-                                  true) and true or false
+                                  true or currentResourceData[ore] and
+                                  currentResourceData[ore].has_starting_area_placement == true) and
+                                  true or false
     if is_starting_patch then
         startingOreCount = startingOreCount + 1
         currentResourceData[ore].starting_patch = startingOreCount
@@ -108,6 +109,8 @@ divide circle into n slices
 for each slice, generate a point from 0-0.5 of the slice angle,
     0.25 to 0.75 the "total" distance to the edge
 ]]
+
+-- TODO: grid starting area
 local smallRotationFactor = 1 -
                                 functions.slider_to_scale(
                                     "control-setting:map-rotation:size:multiplier")
@@ -118,7 +121,7 @@ local sliceSize = 2 * math.pi / startingOreCount
 local startingPoints = {}
 for i = 1, startingOreCount do
     local random = functions.get_random_point(i, i, startingAreaRadius)
-    local radius = (random.y) / 2 + startingAreaRadius / 4
+    local radius = (random.y) / 2 + startingAreaRadius / 2
     local angle = random.x / startingAreaRadius * sliceSize / 2 + i * sliceSize + rotationFactor
     local point_x = radius * noise.cos(angle)
     local point_y = radius * noise.sin(angle)
@@ -146,8 +149,8 @@ for ore, oreData in pairs(currentResourceData) do
     local random_spot_size_maximum = oreData.random_spot_size_maximum or 2
     oreData.variance = random_spot_size_maximum - random_spot_size_minimum
     oreData.random_spot_size_minimum = random_spot_size_minimum
-    oreData.starting_rq_factor_multiplier_multiplier =
-        1 + ((oreData.starting_rq_factor_multiplier or 1) - 1) * tne(starting_factor)
+    oreData.starting_rq_factor_multiplier = 1 + ((oreData.starting_rq_factor_multiplier or 1) - 1) *
+                                                tne(starting_factor)
 end
 
 local overallFrequency = settings.startup["fractured-world-overall-resource-frequency"].value *
@@ -167,27 +170,27 @@ local function get_infinite_probability(ore)
     local parentProbability = data.raw["noise-expression"]["fractured-world-" .. parentOreName ..
                                   "-probability"].expression
 
-    local minRadius = 1 / 8
-    local maxRadius = 1 / 2
+    local minRadius = 1 / 16
+    local maxRadius = 1 / 8
     local get_radius = functions.make_interpolation(parentOreData.startLevel, minRadius,
                                                     parentOreData.endLevel, maxRadius)
 
     local thisRadius = get_radius(aux)
+    local sizeMultiplier = noise.get_control_setting(ore).size_multiplier
     data:extend{
         {
             type = "noise-expression",
             name = "fractured-world-" .. ore .. "radial-multiplier",
-            expression = noise.max(thisRadius - scaledRadius, 0)
+            expression = noise.clamp(thisRadius - scaledRadius, 0, 1)
         }
     }
     -- if the island is dry, *or* if it has biters on it, place the infinite ore
     local moistureFactor = noise.max(noise.less_than(noise.var("moisture"), tne(0.5)),
                                      noise.var("fractured-world-biter-islands"))
-    local sizeMultiplier = noise.get_control_setting(ore).size_multiplier
-    local randomness = noise.clamp(noise.var("fw-scaling-noise"), 1, 10)
+    local randomness = noise.clamp(noise.var("fw-scaling-noise"), 0.5, 2)
     local probabilities = {
-        tne(10), parentProbability, moistureFactor,
-        noise.var("fractured-world-" .. ore .. "radial-multiplier"), sizeMultiplier, randomness
+        tne(1), parentProbability, moistureFactor, sizeMultiplier,
+        noise.var("fractured-world-" .. ore .. "radial-multiplier"), randomness
     }
     return functions.multiply_probabilities(probabilities)
 end
@@ -221,7 +224,7 @@ local function get_probability(ore)
     probability_expression = probability_expression * (tne(1) - starting_factor)
     if oreData.starting_patch then
         local startingPatchRadius = startingPatchDefaultRadius * settings.size_multiplier ^ 0.5 *
-                                        (oreData.starting_rq_factor_multiplier_multiplier or 1)
+                                        (oreData.starting_rq_factor_multiplier or 1)
         local startingPoint = startingPoints[oreData.starting_patch]
         local point_x = startingPoint.x
         local point_y = startingPoint.y
@@ -268,7 +271,7 @@ local function get_richness(ore)
         1 / noise.min(oreData.random_probability or 1, 1), oreCountMultiplier, variance,
         1 / tne(fnp.landDensity), noise.max(1 / startingPatchScaleFactor, 1),
         noise.clamp(noise.absolute_value(noise.var("fw-small-noise") / 25 + 2), 0.5, 2),
-        1 / oreData.starting_rq_factor_multiplier_multiplier
+        1 / oreData.starting_rq_factor_multiplier
     }
     local richness_expression = noise.max((functions.multiply_probabilities(factors) +
                                               additional_richness) * richness_post_multiplier,
