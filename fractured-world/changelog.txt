@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.5
-Date: ????
+Date: 2021-07-12
   Changes:
     - Added new scraper mod to grab data from any mods calling base's resource library
     - Base density now changes relative frequencies, instead of changing relative richness. Uranium ore is now more rare as a result
