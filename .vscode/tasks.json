@@ -1,0 +1,17 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Package",
+            "dependsOn": [
+                "FW Package"
+            ]
+        },
+        {
+            "type": "factorio",
+            "modname": "fractured-world",
+            "command": "package",
+            "label": "FW Package"
+        }
+    ]
+}
