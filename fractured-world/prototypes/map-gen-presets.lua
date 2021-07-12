@@ -18,7 +18,7 @@ local scaledRadius = (1 - radius / functions.size) * 100 - 50
 
 data:extend({{type = "noise-expression", name = "scaled-radius", expression = scaledRadius}})
 
-mgp["fw-debug"] = {
+--[[mgp["fw-debug"] = {
     order = "h",
     basic_settings = {
         property_expression_names = {
@@ -26,7 +26,7 @@ mgp["fw-debug"] = {
             ["entity:angels-ore1:probability"] = 10,
             elevation = 10
         }
-    }
+    }   
 } -- ]]
 
 local count_to_order = functions.count_to_order
