@@ -184,14 +184,28 @@ for ore, oreData in pairs(currentResourceData) do
     oreData.endLevel = tne(oreData.endLevel) / (oreCountMultiplier) / total_spots_per_km2
 end
 
+local minRadius = 1 / 8
+local maxRadius = 1 / 3
+local infinite_ore_limitation = settings.startup["fractured-world-infinite-ore-dry-only"].value
+local moistureFactor = tne(1)
+if infinite_ore_limitation then
+    moistureFactor = noise.less_than(noise.var("moisture"), tne(0.5))
+else
+    minRadius = -1 / 3
+end
+
+-- if the island is dry, *or* if it has biters on it, place the infinite ore
+
+local biterFactor = noise.var("fractured-world-biter-islands")
+local smallNoise = noise.clamp(noise.var("fw-small-noise"), -1, 0) / 4
+local randomness = noise.delimit_procedure(noise.max(moistureFactor, biterFactor) * smallNoise)
+
 local function get_infinite_probability(ore)
     local parentOreName = infiniteOreData[ore].parentOreName
     local parentOreData = currentResourceData[parentOreName]
     local parentProbability = data.raw["noise-expression"]["fractured-world-" .. parentOreName ..
                                   "-probability"].expression
 
-    local minRadius = 1 / 8
-    local maxRadius = 1 / 3
     local get_radius = functions.make_interpolation(parentOreData.startLevel, minRadius,
                                                     parentOreData.endLevel, maxRadius)
 
@@ -204,13 +218,10 @@ local function get_infinite_probability(ore)
             expression = thisRadius - scaledRadius
         }
     }
-    -- if the island is dry, *or* if it has biters on it, place the infinite ore
     -- local withinRadius = noise.less_than(scaledRadius, thisRadius)
-    local moistureFactor = noise.max(noise.less_than(noise.var("moisture"), tne(0.5)),
-                                     noise.var("fractured-world-biter-islands"))
-    local randomness = noise.clamp(noise.var("fw-small-noise"), -1, 0) / 4
+
     local probabilities = {
-        tne(10), parentProbability, moistureFactor, sizeMultiplier,
+        tne(10), parentProbability, randomness, sizeMultiplier,
         noise.var("fractured-world-" .. ore .. "radial-multiplier")
     }
     return functions.multiply_probabilities(probabilities) + randomness

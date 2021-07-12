@@ -9,12 +9,17 @@ local fw_settings = {
         type = "double-setting",
         name = "fractured-world-overall-resource-frequency",
         setting_type = "startup",
-        default_value = 0.02,
+        default_value = 0.1,
         minimum_value = 0,
         maximum_value = 1
     }, {
         type = "bool-setting",
         name = "fractured-world-enable-infinite-parenting",
+        setting_type = "startup",
+        default_value = true
+    }, {
+        type = "bool-setting",
+        name = "fractured-world-infinite-ore-dry-only",
         setting_type = "startup",
         default_value = true
     }, {
