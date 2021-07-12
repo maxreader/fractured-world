@@ -90,9 +90,9 @@ return {
         basic_settings = {
             property_expression_names = {
                 ["fw_value"] = "fractured-world-value-diamonds",
-                ["fw_distance"] = "fractured-world-point-distance-diamonds"
+                ["fw_distance"] = "fractured-world-point-distance-circles"
             },
-            autoplace_controls = {["overall-resources"] = {size = 0.5}}
+            autoplace_controls = {["overall-resources"] = {frequency = 1 / 6, size = 0.5}}
         }
     }
 }
