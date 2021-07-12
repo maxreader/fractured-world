@@ -1,7 +1,8 @@
 require("fractured-world-loader")
 local resource_autoplace = require("resource-autoplace")
 local initialize_patch_set = resource_autoplace.initialize_patch_set
-local resource_autoplace_settings = resource_autoplace.resource_autoplace_settings
+local resource_autoplace_settings =
+    resource_autoplace.resource_autoplace_settings
 
 local function fractured_world_resource_autoplace_settings(params)
     fractured_world:set_resource_data(params.name, params)
@@ -27,7 +28,7 @@ function require(filename)
             resource_autoplace_settings = fractured_world_resource_autoplace_settings
         }
     else
-        old_require(filename)
+        return old_require(filename)
     end
 end
 
