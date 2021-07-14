@@ -38,7 +38,8 @@ local function make_voronoi_noise_expressions(name, presetData)
     local class = args.class or "one-point"
     local aspectRatio = args.aspectRatio or 1
     if class == "vanilla-islands" then
-        args.size = (functions.defaultSize * 6 + 2048) / noise.var("segmentation_multiplier")
+        args.size = (functions.defaultSize * 6 + 2048) /
+                        noise.var("segmentation_multiplier")
     else
         args.size = size
     end
@@ -66,7 +67,9 @@ local function make_voronoi_noise_expressions(name, presetData)
         local d2 = points.secondDistance
         elevation = fnp.create_elevation((d1 - d2), args)
         elevation = elevation - functions.defaultSize * 3 / 2 -- ]]
-        if args.use_web then elevation = -elevation - functions.defaultSize / 2 end
+        if args.use_web then
+            elevation = -elevation - functions.defaultSize / 2
+        end
         pointDistance = points.distance
         value = points.value
     elseif class == "vanilla-islands" then
@@ -91,7 +94,8 @@ local function make_voronoi_noise_expressions(name, presetData)
         --]]
 
     if not args.vanillaIslands then
-        local final = fnp.create_voronoi_starting_area(elevation, value, pointDistance, args)
+        local final = fnp.create_voronoi_starting_area(elevation, value,
+                                                       pointDistance, args)
         elevation = final.elevation
         value = final.value
         pointDistance = final.pointDistance
@@ -122,7 +126,8 @@ local function make_voronoi_noise_expressions(name, presetData)
 end
 
 local function make_cartesian_noise_expressions(name, args)
-    local generating_function = fractured_world:get_cartesian_function(args.cartesian)
+    local generating_function = fractured_world:get_cartesian_function(
+                                    args.cartesian)
     data:extend{
         {
             type = "noise-expression",
@@ -138,14 +143,20 @@ local function make_cartesian_noise_expressions(name, args)
                     y = y + size / 2
                     local cellX = floorDiv(x, size)
                     local cellY = floorDiv(y, size)
-                    local localX = noise.absolute_value(modulo(x, size) - size / 2) - 1
-                    local localY = noise.absolute_value(modulo(y, size) - size / 2) - 1
-                    local height = size / 2 - distance(localX, localY, "chessboard")
+                    local localX =
+                        noise.absolute_value(modulo(x, size) - size / 2) - 1
+                    local localY =
+                        noise.absolute_value(modulo(y, size) - size / 2) - 1
+                    local height =
+                        size / 2 - distance(localX, localY, "chessboard")
                     local isOrigin = 1 -
-                                         noise.min(1, noise.absolute_value(cellX) +
-                                                       noise.absolute_value(cellY))
-                    return generating_function(cellX, cellY) * height * -2 + height - 1 + isOrigin *
-                               size / 2
+                                         noise.min(1,
+                                                   noise.absolute_value(cellX) +
+                                                       noise.absolute_value(
+                                                           cellY))
+                    return
+                        generating_function(cellX, cellY) * height * -2 + height -
+                            1 + isOrigin * size / 2
                 end)
         }
     }
@@ -160,7 +171,9 @@ local prototypes = {
         richness = false,
         order = "d-a",
         category = "terrain",
-        localised_description = {"autoplace-control-description.island-randomness"}
+        localised_description = {
+            "autoplace-control-description.island-randomness"
+        }
     }, {
         type = "autoplace-control",
         name = "map-rotation",
@@ -171,10 +184,12 @@ local prototypes = {
     }, {
         type = "autoplace-control",
         name = "overall-resources",
-        richness = false,
+        richness = true,
         order = "a",
         category = "resource",
-        localised_description = {"autoplace-control-description.overall-resources"}
+        localised_description = {
+            "autoplace-control-description.overall-resources"
+        }
     }, {
         type = "noise-expression",
         name = "control-setting:island-randomness:frequency:multiplier",
@@ -201,18 +216,24 @@ local prototypes = {
         expression = noise.to_noise_expression(0)
     }, {
         type = "noise-expression",
+        name = "control-setting:overall-resources:richness:multiplier",
+        expression = noise.to_noise_expression(1)
+    }, {
+        type = "noise-expression",
         name = "fractured-world-concentric-circles",
         order = "4000",
         intended_property = "elevation",
-        expression = noise.define_noise_function(function(x, y, tile, map)
-            local voronoi = noise.var("fractured-world-circles")
-            return noise.ridge(voronoi, -10, 20)
-        end)
+        expression = noise.define_noise_function(
+            function(x, y, tile, map)
+                local voronoi = noise.var("fractured-world-circles")
+                return noise.ridge(voronoi, -10, 20)
+            end)
     }, {
         type = "noise-expression",
         name = "fractured-world-temperature",
         order = "4000",
-        expression = modulo(noise.var("fw_value") * 47) * temperatureRange + temperatureFloor
+        expression = modulo(noise.var("fw_value") * 47) * temperatureRange +
+            temperatureFloor
     }, {
         type = "noise-expression",
         name = "fractured-world-aux",
@@ -227,30 +248,35 @@ local prototypes = {
         type = "noise-expression",
         name = "fractured-world-cartesian-value",
         intended_property = "fw_value",
-        expression = noise.define_noise_function(function(x, y, tile, map)
-            local rotatedCoordinates = functions.rotate_map()
-            x = rotatedCoordinates.x
-            y = rotatedCoordinates.y
-            x = x + size / 2
-            y = y + size / 2
-            return functions.get_random_point(floorDiv(x, size), floorDiv(y, size), functions.size)
-                       .val
-        end)
+        expression = noise.define_noise_function(
+            function(x, y, tile, map)
+                local rotatedCoordinates = functions.rotate_map()
+                x = rotatedCoordinates.x
+                y = rotatedCoordinates.y
+                x = x + size / 2
+                y = y + size / 2
+                return functions.get_random_point(floorDiv(x, size),
+                                                  floorDiv(y, size),
+                                                  functions.size).val
+            end)
     }, {
         type = "noise-expression",
         name = "fractured-world-chessboard-distance",
         -- intended_property = "fw_distance",
-        expression = noise.define_noise_function(function(x, y, tile, map)
-            local rotatedCoordinates = functions.rotate_map()
-            x = rotatedCoordinates.x
-            y = rotatedCoordinates.y
+        expression = noise.define_noise_function(
+            function(x, y, tile, map)
+                local rotatedCoordinates = functions.rotate_map()
+                x = rotatedCoordinates.x
+                y = rotatedCoordinates.y
 
-            local distanceToOrigin = functions.distance(x, y, "chessboard")
-            local starting_factor = noise.clamp((distanceToOrigin - size) * math.huge, -1, 1)
-            x = modulo(x + size / 2, size) - size / 2
-            y = modulo(y + size / 2, size) - size / 2
-            return functions.distance(x, y, "chessboard") * starting_factor
-        end)
+                local distanceToOrigin = functions.distance(x, y, "chessboard")
+                local starting_factor = noise.clamp(
+                                            (distanceToOrigin - size) *
+                                                math.huge, -1, 1)
+                x = modulo(x + size / 2, size) - size / 2
+                y = modulo(y + size / 2, size) - size / 2
+                return functions.distance(x, y, "chessboard") * starting_factor
+            end)
     }, {
         type = "noise-expression",
         name = "fw-scaling-noise",
@@ -281,7 +307,8 @@ local prototypes = {
                 seed0 = tne(004),
                 seed1 = noise.var("map_seed"),
                 input_scale = tne(1 / 10 *
-                                      noise.var("control-setting:overall-resources:size:multiplier")),
+                                      noise.var(
+                                          "control-setting:overall-resources:size:multiplier")),
                 output_scale = tne(10),
                 octaves = tne(4),
                 octave_output_scale_multiplier = tne(2),
@@ -317,8 +344,7 @@ local prototypes = {
         name = "fw_distance",
         intended_property = "fw_distance",
         expression = tne(0)
-    },
-    {
+    }, {
         type = "noise-expression",
         name = "fw_value",
         intended_property = "fw_value",
@@ -327,47 +353,60 @@ local prototypes = {
         type = "noise-expression",
         name = "fw_land_density",
         expression = (75.17 * waterLevel ^ 2 - 18503 * waterLevel + 451000)
-    },
-    {type = "noise-expression", name = "fw_rotated_x", expression = tne(functions.rotate_map().x)},
-    {type = "noise-expression", name = "fw_rotated_y", expression = tne(functions.rotate_map().y)},
-    {
+    }, {
+        type = "noise-expression",
+        name = "fw_rotated_x",
+        expression = tne(functions.rotate_map().x)
+    }, {
+        type = "noise-expression",
+        name = "fw_rotated_y",
+        expression = tne(functions.rotate_map().y)
+    }, {
         type = "noise-expression",
         name = "fractured-world-infinite-coastline",
         expression = tne(functions.rotate_map().x + 120)
     }, {
         type = "noise-expression",
         name = "fractured-world-land-grid",
-        expression = noise.define_noise_function(function(x, y, tile, map)
-            x = noise.floor(x)
-            y = noise.floor(y)
-            local isLand = noise.clamp(noise.clamp(elevation, -1, 1) * math.huge, 0, 1)
-            x = modulo(x, 32)
-            y = modulo(y, 32)
-            local isGrid = 1 - noise.clamp(x * y, 0, 1)
-            local isLand = noise.less_than(-elevation, 0)
-            local isGrid = noise.equals(x * y, 0)
-            return 1000 * (isGrid) * (isLand) - 500
-        end)
+        expression = noise.define_noise_function(
+            function(x, y, tile, map)
+                x = noise.floor(x)
+                y = noise.floor(y)
+                local isLand = noise.clamp(
+                                   noise.clamp(elevation, -1, 1) * math.huge, 0,
+                                   1)
+                x = modulo(x, 32)
+                y = modulo(y, 32)
+                local isGrid = 1 - noise.clamp(x * y, 0, 1)
+                local isLand = noise.less_than(-elevation, 0)
+                local isGrid = noise.equals(x * y, 0)
+                return 1000 * (isGrid) * (isLand) - 500
+            end)
     }, {
         type = "noise-expression",
         name = "fractured-world-water-grid",
-        expression = noise.define_noise_function(function(x, y, tile, map)
-            x = noise.floor(x)
-            y = noise.floor(y)
-            --[[local isWater = noise.clamp(noise.clamp(-elevation, -1, 1) * math.huge, 0, 1)]]
-            x = modulo(x, 32)
-            y = modulo(y, 32)
-            --[[local isGrid = 1 - noise.clamp(x * y, 0, 1)]]
-            local isWater = noise.less_than(elevation, 0)
-            local isGrid = noise.equals(x * y, 0)
-            return 10000 * isGrid * (isWater) - 500
-        end)
+        expression = noise.define_noise_function(
+            function(x, y, tile, map)
+                x = noise.floor(x)
+                y = noise.floor(y)
+                --[[local isWater = noise.clamp(noise.clamp(-elevation, -1, 1) * math.huge, 0, 1)]]
+                x = modulo(x, 32)
+                y = modulo(y, 32)
+                --[[local isGrid = 1 - noise.clamp(x * y, 0, 1)]]
+                local isWater = noise.less_than(elevation, 0)
+                local isGrid = noise.equals(x * y, 0)
+                return 10000 * isGrid * (isWater) - 500
+            end)
     }
     --[[{type = "noise-expression", name = "fractured-world-web", intended_property = "elevation"}]]
 }
 data:extend(prototypes)
-data.raw.tile["lab-dark-1"].autoplace = {probability_expression = tne(-math.huge)}
-data.raw.tile["deepwater-green"].autoplace = {probability_expression = tne(-math.huge)}
+data.raw.tile["lab-dark-1"].autoplace = {
+    probability_expression = tne(-math.huge)
+}
+data.raw.tile["deepwater-green"].autoplace = {
+    probability_expression = tne(-math.huge)
+}
 
 return {
     make_voronoi_noise_expressions = make_voronoi_noise_expressions,

@@ -6,7 +6,7 @@ local resource_autoplace_settings =
 
 local function fractured_world_resource_autoplace_settings(params)
     fractured_world:set_resource_data(params.name, params)
-    resource_autoplace_settings(params)
+    return resource_autoplace_settings(params)
 end
 
 local is_resource_autoplace = {

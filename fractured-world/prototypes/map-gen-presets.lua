@@ -12,11 +12,18 @@ local make_voronoi_noise_expressions = fne.make_voronoi_noise_expressions
     }
 }]]
 local noise = require("noise")
-local radius = noise.absolute_value(noise.var("fractured-world-point-distance-diamonds"))
+local radius = noise.absolute_value(noise.var(
+                                        "fractured-world-point-distance-diamonds"))
 
 local scaledRadius = (1 - radius / functions.size) * 100 - 50
 
-data:extend({{type = "noise-expression", name = "scaled-radius", expression = scaledRadius}})
+data:extend({
+    {
+        type = "noise-expression",
+        name = "scaled-radius",
+        expression = scaledRadius
+    }
+})
 
 --[[mgp["fw-debug"] = {
     order = "h",
@@ -75,7 +82,11 @@ local function make_preset(name, args)
         cliff_settings = {richness = 0},
         autoplace_controls = {
             ["island-randomness"] = {frequency = frequency, size = size},
-            ["map-rotation"] = {frequency = mapRotation[1], size = mapRotation[2]}
+            ["map-rotation"] = {
+                frequency = mapRotation[1],
+                size = mapRotation[2]
+            },
+            ["overall-resources"] = {richness = 6}
         }
     }
     local mgs = args.basic_settings or {}
@@ -95,12 +106,16 @@ local function make_preset(name, args)
         end
     end
     if args.mapGrid == true then
-        mgs.property_expression_names["tile:lab-dark-1:probability"] = "fractured-world-land-grid"
+        mgs.property_expression_names["tile:lab-dark-1:probability"] =
+            "fractured-world-land-grid"
         mgs.property_expression_names["tile:deepwater-green:probability"] =
             "fractured-world-water-grid"
     end
 
-    mgp["fractured-world-" .. name] = {order = "h-" .. count_to_order(count), basic_settings = mgs}
+    mgp["fractured-world-" .. name] = {
+        order = "h-" .. count_to_order(count),
+        basic_settings = mgs
+    }
     count = count + 1
 end
 for name, args in pairs(fractured_world.preset_data) do make_preset(name, args) end

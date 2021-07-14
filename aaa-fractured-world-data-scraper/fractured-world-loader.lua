@@ -1,6 +1,6 @@
 fractured_world = {}
-fractured_world.raw_resource_data = {
-    ["iron-ore"] = {base_density = 10, starting_rq_factor_multiplier = 1.5},
+fractured_world.raw_resource_data = {}
+--[[{["iron-ore"] = {base_density = 10, starting_rq_factor_multiplier = 1.5},
     ["copper-ore"] = {base_density = 8, starting_rq_factor_multiplier = 1.2},
     ["coal"] = {base_density = 8, starting_rq_factor_multiplier = 1.1},
     ["stone"] = {base_density = 4, starting_rq_factor_multiplier = 1.1},
@@ -18,7 +18,7 @@ fractured_world.raw_resource_data = {
         additional_richness = 220000,
         random_probability = 1 / 48
     }
-}
+}]]
 
 local function checkString(v)
     if type(v) ~= "string" then error(tostring(v) .. " must be a string") end
@@ -156,7 +156,8 @@ end--]]
 
 local allowed_class2 = {probability = true, richness = true}
 local allowed_class1 = {resource = true, enemy = true}
-function fractured_world.add_property_expression(self, name, class1, class2, expression)
+function fractured_world.add_property_expression(self, name, class1, class2,
+                                                 expression)
     checkString(name)
     checkString(class1)
     checkString(class2)
@@ -166,10 +167,18 @@ function fractured_world.add_property_expression(self, name, class1, class2, exp
     if not allowed_class2[class2] then
         error(tostring(class2) .. " is not a valid property expression type.")
     end
-    if not self.property_expressions then self.property_expressions = {resource = {}, enemy = {}} end
+    if not self.property_expressions then
+        self.property_expressions = {resource = {}, enemy = {}}
+    end
     local noiseExpName = "fractured-world-" .. name .. "-" .. tostring(class2)
     local propExpName = "entity:" .. name .. ":" .. tostring(class2)
-    data:extend{{type = "noise-expression", name = noiseExpName, expression = expression}}
+    data:extend{
+        {
+            type = "noise-expression",
+            name = noiseExpName,
+            expression = expression
+        }
+    }
     if class1 == "resource" then
         self.property_expressions.resource[propExpName] = noiseExpName
     elseif class1 == "enemy" then
