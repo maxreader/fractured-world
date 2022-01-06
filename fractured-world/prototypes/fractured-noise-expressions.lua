@@ -93,7 +93,7 @@ local function make_voronoi_noise_expressions(name, presetData)
         elevation = 100 * percentFromBorder - 50 + waterSlider
         --]]
 
-    if not args.vanillaIslands then
+    if not class == "vanilla-islands" then
         local final = fnp.create_voronoi_starting_area(elevation, value,
                                                        pointDistance, args)
         elevation = final.elevation

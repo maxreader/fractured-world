@@ -4,19 +4,23 @@ local modulo = functions.modulo
 local floorDiv = functions.floorDiv
 local distance = functions.distance
 local greater_than = functions.greater_than
-local ssnf = functions.slider_to_scale("control-setting:island-randomness:size:multiplier")
+local ssnf = functions.slider_to_scale(
+                 "control-setting:island-randomness:size:multiplier")
 local rof = functions.rof
 local function waves(x, y)
     y = y - 1
     x = modulo(x, 4) * (1 - ssnf) + modulo(y, 4) * ssnf
     y = modulo(y, 4) * (1 - ssnf) + modulo(x, 4) * ssnf
-    return 1 - noise.clamp(greater_than(y, 0) - modulo(x, 2) * (1 - noise.equals(y, x)), 0, 1)
+    return 1 -
+               noise.clamp(
+                   greater_than(y, 0) - modulo(x, 2) * (1 - noise.equals(y, x)),
+                   0, 1)
 end
 
 local function on_spiral(x, y)
     local isYNegative = -noise.clamp(y, -1, 0)
-    local specialFactor = (noise.clamp(noise.absolute_value(y - x) * math.huge, 0, 1) - 1) *
-                              isYNegative
+    local specialFactor = (noise.clamp(noise.absolute_value(y - x) * math.huge,
+                                       0, 1) - 1) * isYNegative
     return modulo(distance(x, y - isYNegative, "chessboard") + specialFactor, 2)
 end
 
@@ -35,7 +39,11 @@ local function is_polytopic_square(x, y)
     local maxNeighbors = floorDiv((1 - rof) * 8)
     local cellsToBeBorn = floorDiv(ssnf * 8)
     local neighbors = 0
-    for v = -1, 1 do for u = -1, 1 do neighbors = neighbors + is_random_square(x + v, y + u) end end
+    for v = -1, 1 do
+        for u = -1, 1 do
+            neighbors = neighbors + is_random_square(x + v, y + u)
+        end
+    end
     neighbors = neighbors - is_random_square(x, y)
     local alive = noise.less_than(neighbors, maxNeighbors)
     return noise.max(alive, noise.equals(cellsToBeBorn, neighbors))
@@ -49,12 +57,27 @@ end
 
 local function is_chessboard_square(x, y) return modulo(x + y, 2) end
 
+local prng = functions.pseudo_random
+local function is_maze_square(x, y)
+    x_odd = modulo(x, 2)
+    y_odd = modulo(y, 2)
+    random = prng(x, y)
+    -- Intersections are on doubly even squares
+    intersection = 1 - noise.max(x_odd, y_odd)
+    water_square = x_odd * y_odd
+    bridge = (1 - intersection - water_square) * noise.less_than(random, rof)
+    return noise.max(intersection, bridge)
+end
+
 local cartesianFunctions = {
     ["waves"] = waves,
     ["on_spiral"] = on_spiral,
     ["is_random_square"] = is_random_square,
     ["is_polytopic_square"] = is_polytopic_square,
     ["is_trellis_square"] = is_trellis_square,
-    ["is_chessboard_square"] = is_chessboard_square
+    ["is_chessboard_square"] = is_chessboard_square,
+    ["is_maze_square"] = is_maze_square
 }
-for k, v in pairs(cartesianFunctions) do fractured_world:add_cartesian_function(k, v) end
+for k, v in pairs(cartesianFunctions) do
+    fractured_world:add_cartesian_function(k, v)
+end

@@ -4,13 +4,8 @@ local fne = require("prototypes.fractured-noise-expressions")
 local make_cartesian_noise_expressions = fne.make_cartesian_noise_expressions
 local make_voronoi_noise_expressions = fne.make_voronoi_noise_expressions
 
---[[data:extend{
-    {
-        type = "noise-expression",
-        name = "debug",
-        expression = noise.var("finite_water_level") * 100
-    }
-}]]
+data.raw.tile["out-of-map"].autoplace = {probability_expression = 0}
+
 local noise = require("noise")
 local radius = noise.absolute_value(noise.var(
                                         "fractured-world-point-distance-diamonds"))
@@ -24,17 +19,6 @@ data:extend({
         expression = scaledRadius
     }
 })
-
---[[mgp["fw-debug"] = {
-    order = "h",
-    basic_settings = {
-        property_expression_names = {
-            ["entity:angels-ore1:richness"] = "scaled-radius",
-            ["entity:angels-ore1:probability"] = 10,
-            elevation = 10
-        }
-    }   
-} -- ]]
 
 local count_to_order = functions.count_to_order
 
@@ -58,7 +42,8 @@ local function make_preset(name, args)
             fw_value = "fractured-world-cartesian-value"
             fw_distance = "fractured-world-chessboard-distance"
         end
-        if not (args.voronoi and args.voronoi.vanillaIslands) then
+        if not (args.voronoi and args.voronoi and args.voronoi.class ==
+            "vanilla-islands") then
             property_expression_names = {
                 elevation = elevation,
                 moisture = "fractured-world-moisture",
@@ -121,3 +106,24 @@ end
 for name, args in pairs(fractured_world.preset_data) do make_preset(name, args) end
 
 mgp.default.default = false
+
+--[[mgp["fw-debug"] = {
+    order = "h",
+    basic_settings = {
+        property_expression_names = {
+            ["entity:angels-ore1:richness"] = "scaled-radius",
+            ["entity:angels-ore1:probability"] = 10,
+            elevation = 10
+        }
+    }   
+} -- ]]
+
+-- -noise.var("elevation") * 1000 + 1
+
+--[[data:extend{
+    {
+        type = "noise-expression",
+        name = "debug",
+        expression = noise.var("finite_water_level") * 100
+    }
+}]]

@@ -13,9 +13,15 @@ return {
         fracturedResources = false,
         fracturedEnemies = false
     },
-    ["gears"] = {fracturedControls = {size = 0.5}, voronoi = {distanceModifier = "gear"}},
+    ["gears"] = {
+        fracturedControls = {size = 0.5},
+        voronoi = {distanceModifier = "gear"}
+    },
     ["circles"] = {voronoi = {}},
-    ["squares"] = {fracturedControls = {frequency = 6}, voronoi = {distanceType = "chessboard"}},
+    ["squares"] = {
+        fracturedControls = {frequency = 6},
+        voronoi = {distanceType = "chessboard"}
+    },
     ["diamonds"] = {voronoi = {distanceType = "rectilinear"}},
     ["bricks"] = {
         fracturedControls = {frequency = 6, size = 3 / 2},
@@ -31,7 +37,10 @@ return {
             distanceModifier = "hexagon"
         }
     },
-    ["flowers"] = {fracturedControls = {size = 0.5}, voronoi = {distanceModifier = "flower"}}, --[[,
+    ["flowers"] = {
+        fracturedControls = {size = 0.5},
+        voronoi = {distanceModifier = "flower"}
+    }, --[[,
     ["web"] = {
         voronoi = {class = "two-point", use_web = true}
     },]]
@@ -45,36 +54,60 @@ return {
         defaultSize = "fw_half_default_size",
         fracturedControls = {frequency = 6, size = 6},
         cartesian = "waves",
-        basic_settings = {autoplace_controls = {["overall-resources"] = {size = 0.5}}}
+        basic_settings = {
+            autoplace_controls = {["overall-resources"] = {size = 0.5}}
+        }
     },
     ["trellis"] = {
         defaultSize = "fw_half_default_size",
         rotation = {1, 2},
         cartesian = "is_trellis_square",
-        basic_settings = {autoplace_controls = {["overall-resources"] = {size = 0.5}}},
+        basic_settings = {
+            autoplace_controls = {["overall-resources"] = {size = 0.5}}
+        },
         land_density = 0.75
     },
     ["chessboard"] = {
         defaultSize = "fw_half_default_size",
         cartesian = "is_chessboard_square",
-        basic_settings = {autoplace_controls = {["overall-resources"] = {size = 0.5}}},
+        basic_settings = {
+            autoplace_controls = {["overall-resources"] = {size = 0.5}}
+        },
         land_density = 0.5
     },
     ["random-squares"] = {
         defaultSize = "fw_half_default_size",
         fracturedControls = {frequency = 6},
         cartesian = "is_random_square",
-        basic_settings = {autoplace_controls = {["overall-resources"] = {size = 0.5}}}
+        basic_settings = {
+            autoplace_controls = {["overall-resources"] = {size = 0.5}}
+        }
     },
     ["polytopic"] = {
         defaultSize = "fw_half_default_size",
         fracturedControls = {frequency = 2 / 3},
         cartesian = "is_polytopic_square",
-        basic_settings = {autoplace_controls = {["overall-resources"] = {size = 0.5}}}
+        basic_settings = {
+            autoplace_controls = {["overall-resources"] = {size = 0.5}}
+        }
+    },
+    ["maze"] = {
+        defaultSize = "fw_half_default_size",
+        cartesian = "is_maze_square",
+        basic_settings = {
+            autoplace_controls = {
+                ["overall-resources"] = {frequency = 2, size = 0.5},
+                ["island-randomness"] = {frequency = 4 / 3}
+
+            }
+        },
+        fracturedResources = false
     },
     ["infinite-coastline"] = {
         basic_settings = {
-            property_expression_names = {elevation = "fractured-world-infinite-coastline"}
+            property_expression_names = {
+                elevation = "fractured-world-infinite-coastline"
+            }
         },
         fracturedResources = false,
         fracturedEnemies = false
@@ -92,7 +125,9 @@ return {
                 ["fw_value"] = "fractured-world-value-diamonds",
                 ["fw_distance"] = "fractured-world-point-distance-circles"
             },
-            autoplace_controls = {["overall-resources"] = {frequency = 1 / 6, size = 0.5}}
+            autoplace_controls = {
+                ["overall-resources"] = {frequency = 1 / 6, size = 0.5}
+            }
         }
     }
 }
