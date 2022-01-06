@@ -100,8 +100,8 @@ return {
                 ["island-randomness"] = {frequency = 3 / 4}
 
             }
-        },
-        fracturedResources = false
+        }
+        -- fracturedResources = false
     },
     ["infinite-coastline"] = {
         basic_settings = {

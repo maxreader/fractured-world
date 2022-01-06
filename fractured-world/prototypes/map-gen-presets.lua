@@ -3,11 +3,36 @@ local functions = require("prototypes.functions")
 local fne = require("prototypes.fractured-noise-expressions")
 local make_cartesian_noise_expressions = fne.make_cartesian_noise_expressions
 local make_voronoi_noise_expressions = fne.make_voronoi_noise_expressions
+local water_random = functions.modulo(noise.var("fw_value") * 431)
 
 local include_void_tiles = settings.startup["fractured-world-use-void-tiles"]
                                .value
 
-if include_void_tiles then data.raw.tile["out-of-map"].autoplace = {} end
+local water_tiles = {}
+local water_tile_probabilities = {}
+if include_void_tiles then
+    data.raw.tile["out-of-map"].autoplace = {}
+    for name, tile in pairs(data.raw.tile) do
+        if tile.effect == "water" then table.insert(water_tiles, name) end
+    end
+    local n = #water_tiles
+    -- Hardcoding water frequency at 0.1 for now
+    for i, tile in pairs(water_tiles) do
+        local below = functions.less_than(water_random * 10, i / n)
+        local above = functions.greater_than(water_random * 10, (i - 1) / n)
+        local in_range = above * below * noise.var("elevation")
+        local noise_name = "fw-" .. tile .. "-probability"
+        data:extend{
+            {
+                type = "noise-expression",
+                name = noise_name,
+                expression = in_range * math.huge
+            }
+        }
+        water_tile_probabilities[tile] = noise_name
+    end
+
+end
 
 local noise = require("noise")
 local radius = noise.absolute_value(noise.var(
@@ -71,6 +96,10 @@ local function make_preset(name, args)
     if include_void_tiles then
         property_expression_names["tile:out-of-map:probability"] =
             "void-probability"
+        for tile, probability in pairs(water_tile_probabilities) do
+            property_expression_names["tile:" .. tile .. ":probability"] =
+                probability
+        end
     end
 
     local genericBasicSettings = {

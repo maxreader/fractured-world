@@ -1,5 +1,6 @@
 local enemyData = require("prototypes.enemies")
 local ores = require("prototypes.ores")
+local functions = require("prototypes.functions")
 local get_probability = ores.get_probability
 local get_richness = ores.get_richness
 local currentResourceData = ores.currentResourceData
@@ -12,7 +13,8 @@ for resource, _ in pairs(currentResourceData) do
     local richness_expression = get_richness(resource)
     fractured_world:add_property_expression(resource, "resource", "probability",
                                             probability_expression)
-    fractured_world:add_property_expression(resource, "resource", "richness", richness_expression)
+    fractured_world:add_property_expression(resource, "resource", "richness",
+                                            richness_expression)
 end
 
 for resource, _ in pairs(infiniteOreData) do
@@ -20,14 +22,16 @@ for resource, _ in pairs(infiniteOreData) do
     local richness_expression = get_infinite_richness(resource)
     fractured_world:add_property_expression(resource, "resource", "probability",
                                             probability_expression)
-    fractured_world:add_property_expression(resource, "resource", "richness", richness_expression)
+    fractured_world:add_property_expression(resource, "resource", "richness",
+                                            richness_expression)
 end
 
 for _, enemyType in pairs(enemyData) do
     for name, v in pairs(enemyType) do
         local probability_expression = v.probability_expression
         if probability_expression then
-            fractured_world:add_property_expression(name, "enemy", "probability",
+            fractured_world:add_property_expression(name, "enemy",
+                                                    "probability",
                                                     probability_expression)
         end
     end

@@ -1,7 +1,7 @@
 local noise = require("noise")
 local tne = noise.to_noise_expression
-local functions = require("functions")
-local fnp = require("fractured-noise-programs")
+local functions = require("prototypes.functions")
+local fnp = require("prototypes.fractured-noise-programs")
 
 local resources = data.raw["resource"]
 local radius = noise.absolute_value(noise.var("fw_distance"))

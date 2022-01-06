@@ -186,6 +186,7 @@ return {
     floorDiv = floorDiv,
     modulo = modulo,
     greater_than = greater_than,
+    less_than = noise.less_than,
     reduce = reduce,
     get_extremum = get_extremum,
     sum_table = sum_table,
