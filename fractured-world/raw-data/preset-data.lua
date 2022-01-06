@@ -97,7 +97,7 @@ return {
         basic_settings = {
             autoplace_controls = {
                 ["overall-resources"] = {frequency = 2, size = 0.5},
-                ["island-randomness"] = {frequency = 4 / 3}
+                ["island-randomness"] = {frequency = 3 / 4}
 
             }
         },

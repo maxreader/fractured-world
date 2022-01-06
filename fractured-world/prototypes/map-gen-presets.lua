@@ -4,7 +4,10 @@ local fne = require("prototypes.fractured-noise-expressions")
 local make_cartesian_noise_expressions = fne.make_cartesian_noise_expressions
 local make_voronoi_noise_expressions = fne.make_voronoi_noise_expressions
 
-data.raw.tile["out-of-map"].autoplace = {probability_expression = 0}
+local include_void_tiles = settings.startup["fractured-world-use-void-tiles"]
+                               .value
+
+if include_void_tiles then data.raw.tile["out-of-map"].autoplace = {} end
 
 local noise = require("noise")
 local radius = noise.absolute_value(noise.var(
@@ -17,6 +20,10 @@ data:extend({
         type = "noise-expression",
         name = "scaled-radius",
         expression = scaledRadius
+    }, {
+        type = "noise-expression",
+        name = "void-probability",
+        expression = -noise.var("elevation") * 100
     }
 })
 
@@ -59,7 +66,11 @@ local function make_preset(name, args)
                 fw_distance = fw_distance
             }
         end
+    end
 
+    if include_void_tiles then
+        property_expression_names["tile:out-of-map:probability"] =
+            "void-probability"
     end
 
     local genericBasicSettings = {
@@ -117,8 +128,6 @@ mgp.default.default = false
         }
     }   
 } -- ]]
-
--- -noise.var("elevation") * 1000 + 1
 
 --[[data:extend{
     {

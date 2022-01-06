@@ -33,6 +33,11 @@ local fw_settings = {
         setting_type = "startup",
         default_value = "default",
         allowed_values = fractured_world.allowed_presets
+    }, {
+        type = "bool-setting",
+        name = "fractured-world-use-void-tiles",
+        setting_type = "startup",
+        default_value = false
     }
 }
 local n = 0
